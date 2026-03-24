@@ -1,11 +1,12 @@
 use crate::{
     config::Config,
-    services::{editor::EditorService, note::NoteService},
+    services::{editor::EditorService, note::NoteService, parse::ParseService},
 };
 
 pub struct Context {
     pub notes: NoteService,
     pub editor: EditorService,
+    pub parser: ParseService,
 }
 
 impl Context {
@@ -13,6 +14,7 @@ impl Context {
         Self {
             notes: NoteService::new(cfg.notes_dir.clone()),
             editor: EditorService::new(cfg.editor.clone()),
+            parser: ParseService::new(cfg.notes_dir.clone()),
         }
     }
 }
