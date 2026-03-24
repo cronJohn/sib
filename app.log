@@ -1,0 +1,10 @@
+2026-03-24 12:45:46PM  INFO src/main.rs:9: Starting TUI...
+2026-03-24 12:45:46PM  INFO src/tui.rs:38: Key event key=Down
+2026-03-24 12:45:46PM  INFO src/tui.rs:38: Key event key=Down
+2026-03-24 12:45:46PM  INFO src/tui.rs:38: Key event key=Up
+2026-03-24 12:45:47PM  INFO src/tui.rs:38: Key event key=Control-u
+2026-03-24 12:45:47PM  INFO src/tui.rs:38: Key event key=Control-f
+2026-03-24 12:45:47PM  INFO src/tui.rs:38: Key event key=Control-s
+2026-03-24 12:45:48PM  INFO src/tui.rs:38: Key event key=F(5)
+2026-03-24 12:45:49PM  INFO src/tui.rs:38: Key event key=q
+2026-03-24 12:45:49PM  INFO src/main.rs:17: Exiting TUI...

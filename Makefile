@@ -1,0 +1,2 @@
+log:
+	@bat app.log

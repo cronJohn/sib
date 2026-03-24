@@ -13,6 +13,7 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Terminal,
 };
+use tracing::info;
 
 use crate::{app::App, message::Message};
 
@@ -29,13 +30,22 @@ pub fn run_tui(app: &mut App) -> Result<()> {
     loop {
         terminal.draw(|f| render(f, app))?;
 
-        // Exit condition from App state
         if app.should_quit {
             break;
         }
 
-        // Read input
         if let Event::Key(key) = event::read()? {
+            info!(
+                key = %if key.modifiers.is_empty() {
+                    match key.code {
+                        KeyCode::Char(c) => c.to_string(),
+                        other => format!("{:?}", other),
+                    }
+                } else {
+                    format!("{}-{}", key.modifiers, key.code)
+                },
+                "Key event"
+            );
             let msg = match key.code {
                 KeyCode::Up => Some(Message::MoveUp),
                 KeyCode::Down => Some(Message::MoveDown),
