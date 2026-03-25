@@ -1,5 +1,5 @@
-pub mod fixtures;
-pub mod helpers;
+mod fixtures;
+mod helpers;
 
 use crate::{
     fixtures::notes::{NotesFixture, TEST_DIFFICULTIES},
