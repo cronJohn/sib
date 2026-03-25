@@ -4,7 +4,18 @@ impl App {
     pub fn update(&mut self, msg: Message, _ctx: &Context) {
         match msg {
             Message::Quit => self.should_quit = true,
-            Message::InputChar(c) => self.path_filter.push(c),
+            Message::InputChar(c) => {
+                self.filter.slug_query.push(c);
+                let indices = self.apply_filters();
+                self.rebuild_tree(&indices);
+            }
+
+            Message::DeleteChar => {
+                self.filter.slug_query.pop();
+                let indices = self.apply_filters();
+                self.rebuild_tree(&indices);
+            }
+
             Message::NoteSelectionUp => {
                 let mut i = self.selected_note_entry.saturating_sub(1);
                 while i > 0 {
@@ -25,10 +36,6 @@ impl App {
                     }
                     i += 1;
                 }
-            }
-
-            Message::DeleteChar => {
-                self.path_filter.pop();
             }
         }
     }

@@ -4,6 +4,7 @@ use std::{
 };
 
 use rayon::prelude::*;
+use serde_yaml_ng::Value;
 use tracing::warn;
 use walkdir::WalkDir;
 
@@ -127,4 +128,20 @@ pub enum NoteMetadataState {
     Valid(NoteMetadata),
     /// Frontmatter was specified but is improperly formatted
     Invalid(String),
+}
+
+impl NoteMetadataState {
+    pub fn tags(&self) -> Vec<String> {
+        match self {
+            NoteMetadataState::Valid(data) => data.tags.clone(),
+            _ => vec![],
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&Value> {
+        match self {
+            NoteMetadataState::Valid(data) => data.extra.get(key),
+            _ => None,
+        }
+    }
 }
