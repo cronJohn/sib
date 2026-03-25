@@ -1,5 +1,4 @@
 pub mod input;
-pub mod layout;
 pub mod render;
 
 use std::io;
@@ -20,14 +19,16 @@ pub fn run_tui(app: &mut App, ctx: &Context) -> color_eyre::Result<()> {
     enable_raw_mode()?;
 
     let mut stdout = io::stdout();
-
     execute!(stdout, EnterAlternateScreen)?;
+
+    // Get notes from file
+    app.notes = ctx.parser.collect_notes();
 
     loop {
         terminal.draw(|f| render::draw(f, app))?;
 
         if let Event::Key(key) = event::read()?
-            && let Some(msg) = input::handle_key(key)
+            && let Some(msg) = input::handle_key(key, app)
         {
             app.update(msg, ctx);
         }

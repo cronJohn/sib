@@ -1,20 +1,24 @@
 use crate::{app::App, context::Context, message::Message};
 
 impl App {
-    pub fn update(&mut self, msg: Message, ctx: &Context) {
+    pub fn update(&mut self, msg: Message, _ctx: &Context) {
         match msg {
             Message::Quit => self.should_quit = true,
-            Message::OpenNote => {
-                if let Some(note) = self.selected_note() {
-                    let _ = ctx.editor.open(note.path.to_str().unwrap());
+            Message::InputChar(c) => self.path_filter.push(c),
+            Message::NoteSelectionUp => {
+                if self.selected_note_entry > 0 {
+                    self.selected_note_entry -= 1;
                 }
             }
-            Message::DeleteNote => {
-                if let Some(note) = self.selected_note() {
-                    let _ = ctx.notes.delete_note(&note.path);
+
+            Message::NoteSelectionDown => {
+                if self.selected_note_entry + 1 < self.notes.len() {
+                    self.selected_note_entry += 1;
                 }
             }
-            _ => {}
+            Message::DeleteChar => {
+                self.path_filter.pop();
+            }
         }
     }
 }
