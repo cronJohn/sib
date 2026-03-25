@@ -53,7 +53,7 @@ fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
         .notes
         .iter()
         .map(|note| {
-            let name = note.path.as_os_str().to_str().unwrap_or_default();
+            let name = note.slug.as_os_str().to_str().unwrap_or_default();
 
             ListItem::new(name)
         })

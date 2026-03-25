@@ -8,8 +8,8 @@ use crate::services::parse::NoteMetadataState;
 /// Domain entity representing a Markdown file
 #[derive(Debug, Clone)]
 pub struct Note {
-    /// Path to Markdown file
-    pub path: PathBuf,
+    /// Path relative to base_notes_dir
+    pub slug: PathBuf,
     /// Content in the file not including frontmatter
     pub content: String,
     /// Frontmatter content state in file

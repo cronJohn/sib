@@ -28,7 +28,7 @@ impl ParseService {
                     && e.path().extension().map(|ext| ext == "md").unwrap_or(false)
             })
             .par_bridge()
-            .filter_map(|entry| match Self::parse_markdown_file(entry.path()) {
+            .filter_map(|entry| match self.parse_markdown_file(entry.path()) {
                 Ok(note) => Some(note),
                 Err(err) => {
                     warn!("Failed to read {:?}: {:?}", entry.path(), err);
@@ -39,7 +39,8 @@ impl ParseService {
     }
 
     /// Reads a Markdown file, extracts frontmatter + content safely
-    fn parse_markdown_file(path: &Path) -> std::io::Result<Note> {
+    /// Path must be absolute
+    fn parse_markdown_file(&self, path: &Path) -> std::io::Result<Note> {
         let raw = fs::read_to_string(path)?;
 
         let (fm_str, content) = Self::split_markdown_regions(&raw);
@@ -56,8 +57,12 @@ impl ParseService {
             }
         };
 
+        let slug = path.strip_prefix(&self.base_note_dir).map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "Path outside base dir")
+        })?;
+
         Ok(Note {
-            path: path.to_path_buf(),
+            slug: slug.to_path_buf(),
             content,
             metadata,
         })

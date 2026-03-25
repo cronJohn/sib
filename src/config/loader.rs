@@ -1,10 +1,10 @@
-use std::fs;
+use std::{fs, path::PathBuf};
 
 use color_eyre::eyre::{eyre, Result};
 use tracing::info;
 
 use crate::config::{
-    defaults::{DEFAULT_EDITOR, DEFAULT_NOTES_DIR},
+    defaults::{DEFAULT_BASE_NOTES_DIR, DEFAULT_EDITOR},
     setup::initialize_directories,
     Config,
 };
@@ -37,9 +37,7 @@ pub fn load_config() -> Result<Config> {
         );
 
         let default_config = Config {
-            notes_dir: dirs::home_dir()
-                .ok_or_else(|| eyre!("Cannot determine home directory"))?
-                .join(DEFAULT_NOTES_DIR),
+            base_notes_dir: PathBuf::from(DEFAULT_BASE_NOTES_DIR),
             editor: DEFAULT_EDITOR.into(),
         };
 

@@ -75,6 +75,7 @@ fn collect_notes_bulk_randomized_success() {
 
 #[test]
 fn parse_single_note_exact_success() {
+    let expected_note_slug = "note.md";
     let metadata = NoteMetadataBuilder::default()
         .tag("tag1")
         .tag("tag2")
@@ -82,7 +83,7 @@ fn parse_single_note_exact_success() {
         .build();
 
     let (_tmp, service) = NotesFixture::default()
-        .file("note.md", Some(metadata.clone()), "Hello world")
+        .file(expected_note_slug, Some(metadata.clone()), "Hello world")
         .build();
 
     let notes = service.collect_notes();
@@ -100,6 +101,7 @@ fn parse_single_note_exact_success() {
     }
 
     assert_eq!(note.content.trim(), "Hello world");
+    assert_eq!(note.slug.to_str().unwrap(), expected_note_slug);
 }
 
 #[test]
