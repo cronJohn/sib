@@ -22,7 +22,7 @@ pub fn draw(f: &mut Frame, app: &App) {
     // Right pane: filters/metadata (example)
     let metadata_text = app
         .selected_note()
-        .map(|n| format!("Tags: {:?}", n.clone().metadata.unwrap().tags))
+        .map(|n| format!("Metadata: {:?}", n.clone().metadata))
         .unwrap_or_default();
     let metadata_widget = Paragraph::new(metadata_text)
         .block(Block::default().borders(Borders::ALL).title("Metadata"));
