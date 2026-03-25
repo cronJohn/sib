@@ -1,5 +1,6 @@
 pub mod input;
 pub mod render;
+pub mod widgets;
 
 use std::io;
 
