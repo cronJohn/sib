@@ -5,19 +5,29 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::{app::App, domain::tree::Row};
 
-/// Widget to render all Markdown notes
+/// Renders the notes sidebar as a tree-like list.
+/// Directories are visual only; only notes are selectable.
 pub fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
     let items: Vec<ListItem> = app
-        .notes
+        .flattened_rows
         .iter()
-        .map(|note| {
-            let name = note.slug.as_os_str().to_string_lossy();
-            ListItem::new(name)
+        .map(|row| match row {
+            Row::Directory { name, depth } => {
+                // indent directories and prepend folder icon
+                let indent = "  ".repeat(*depth);
+                ListItem::new(format!("{}📁 {}", indent, name))
+            }
+            Row::Note { name, depth, .. } => {
+                // indent notes
+                let indent = "  ".repeat(*depth);
+                ListItem::new(format!("{}{}", indent, name))
+            }
         })
         .collect();
 
+    // Highlight the currently selected note
     let mut state = ListState::default();
     state.select(Some(app.selected_note_entry));
 

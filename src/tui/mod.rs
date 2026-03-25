@@ -22,8 +22,7 @@ pub fn run_tui(app: &mut App, ctx: &Context) -> color_eyre::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
 
-    // Get notes from file
-    app.notes = ctx.parser.collect_notes();
+    app.initialize(&ctx.parser);
 
     loop {
         terminal.draw(|f| render::draw(f, app))?;
