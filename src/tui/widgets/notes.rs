@@ -5,7 +5,10 @@ use ratatui::{
     Frame,
 };
 
-use crate::{app::App, domain::tree::Row};
+use crate::{
+    app::{mode::Focus, App},
+    domain::tree::Row,
+};
 
 /// Renders the notes sidebar as a tree-like list.
 /// Directories are visual only; only notes are selectable.
@@ -31,8 +34,19 @@ pub fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
     let mut state = ListState::default();
     app.selected_note_entry.apply_to_list_state(&mut state);
 
+    let border_style = if matches!(app.focus, Focus::Notes) {
+        Style::default().fg(Color::Yellow)
+    } else {
+        Style::default()
+    };
+
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Notes"))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Notes")
+                .border_style(border_style),
+        )
         .highlight_style(
             Style::default()
                 .fg(Color::Yellow)

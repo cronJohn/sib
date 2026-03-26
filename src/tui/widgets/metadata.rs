@@ -26,8 +26,19 @@ pub fn render_metadata_widget(f: &mut Frame, area: Rect, app: &App) {
         app.selected_filter.apply_to_list_state(&mut state);
     }
 
+    let border_style = if matches!(app.focus, Focus::Filters) {
+        Style::default().fg(Color::Yellow)
+    } else {
+        Style::default()
+    };
+
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Filters"))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Filters")
+                .border_style(border_style),
+        )
         .highlight_symbol(">> ")
         .highlight_style(
             Style::default()
