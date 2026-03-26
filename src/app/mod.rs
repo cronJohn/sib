@@ -4,7 +4,7 @@ pub mod tree;
 
 use crate::{
     app::{
-        filter::FilterCriteria,
+        filter::{FilterCriteria, FilterItem},
         mode::{Focus, InputMode},
     },
     domain::{
@@ -24,14 +24,16 @@ pub struct App {
 
     pub filter: FilterCriteria,
 
+    pub filter_items: Vec<FilterItem>,
+
     /// Focus for the TUI panels
-    pub focus: Focus,
-    pub selected_filter: Selection,
+    pub panel_focus: Focus,
+    pub selected_filter_item: Selection,
 
     // Tree-related state
     pub tree_root: TreeNode,
     pub flattened_rows: Vec<Row>,
-    pub selected_note_entry: Selection,
+    pub selected_note_item: Selection,
 
     // input UI
     pub input_mode: InputMode,
@@ -47,11 +49,12 @@ impl App {
             filter: FilterCriteria::default(),
             tree_root: TreeNode::default(),
             flattened_rows: Vec::default(),
-            focus: Focus::default(),
-            selected_filter: Selection::default(),
+            filter_items: Vec::default(),
+            panel_focus: Focus::default(),
+            selected_filter_item: Selection::default(),
             input_mode: InputMode::default(),
             input_buffer: String::default(),
-            selected_note_entry: Selection::default(),
+            selected_note_item: Selection::default(),
             should_quit: false,
         }
     }
@@ -71,5 +74,6 @@ impl App {
     pub fn recompute_view(&mut self) {
         let indices = self.apply_filters();
         self.rebuild_tree(&indices);
+        self.rebuild_filter_items();
     }
 }

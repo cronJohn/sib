@@ -47,7 +47,8 @@ impl App {
             .map(|(idx, _)| idx)
             .collect()
     }
-    pub fn build_filter_items(&self) -> Vec<FilterItem> {
+
+    pub fn rebuild_filter_items(&mut self) {
         let mut items = Vec::new();
 
         if !self.filter.slug_query.is_empty() {
@@ -62,6 +63,8 @@ impl App {
             items.push(FilterItem::Meta(k.clone(), v.clone()));
         }
 
-        items
+        self.filter_items = items;
+
+        self.selected_filter_item.clamp(self.filter_items.len());
     }
 }

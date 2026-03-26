@@ -36,7 +36,7 @@ pub fn handle_key(key: KeyEvent, app: &mut App) -> Option<Message> {
     }
 
     // Pane specific keybindings
-    match app.focus {
+    match app.panel_focus {
         Focus::Input => handle_input_keys(key),
         Focus::Notes => handle_notes_keys(key),
         Focus::Filters => handle_filter_keys(key),

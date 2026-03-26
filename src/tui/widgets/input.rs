@@ -18,7 +18,7 @@ pub fn render_input_widget(f: &mut Frame, area: Rect, app: &App) {
         InputMode::Meta => "META",
     };
 
-    let border_style = if matches!(app.focus, Focus::Input) {
+    let border_style = if matches!(app.panel_focus, Focus::Input) {
         Style::default().fg(Color::Yellow)
     } else {
         Style::default()

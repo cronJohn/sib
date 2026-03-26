@@ -32,9 +32,9 @@ pub fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
 
     // Highlight the currently selected note
     let mut state = ListState::default();
-    app.selected_note_entry.apply_to_list_state(&mut state);
+    app.selected_note_item.apply_to_list_state(&mut state);
 
-    let border_style = if matches!(app.focus, Focus::Notes) {
+    let border_style = if matches!(app.panel_focus, Focus::Notes) {
         Style::default().fg(Color::Yellow)
     } else {
         Style::default()

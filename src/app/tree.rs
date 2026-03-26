@@ -34,7 +34,7 @@ impl App {
         flatten_tree(&self.tree_root, 0, &mut self.flattened_rows, &self.notes);
 
         // Ensure selected note points to first leaf
-        self.selected_note_entry
+        self.selected_note_item
             .select_first(&self.flattened_rows, |r| r.is_selectable());
     }
 }

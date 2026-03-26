@@ -63,7 +63,7 @@ impl App {
             }
 
             Message::CycleFocusForward => {
-                self.focus = match self.focus {
+                self.panel_focus = match self.panel_focus {
                     Focus::Input => Focus::Notes,
                     Focus::Notes => Focus::Filters,
                     Focus::Filters => Focus::Input,
@@ -71,19 +71,17 @@ impl App {
             }
 
             Message::FilterUp => {
-                let items = self.build_filter_items();
-                self.selected_filter.move_up(&items, |_| true);
+                self.selected_filter_item
+                    .move_up(&self.filter_items, |_| true);
             }
 
             Message::FilterDown => {
-                let items = self.build_filter_items();
-                self.selected_filter.move_down(&items, |_| true);
+                self.selected_filter_item
+                    .move_down(&self.filter_items, |_| true);
             }
 
             Message::DeleteSelectedFilter => {
-                let items = self.build_filter_items();
-
-                if let Some(item) = items.get(self.selected_filter.get()) {
+                if let Some(item) = self.filter_items.get(self.selected_filter_item.get()) {
                     match item {
                         FilterItem::Slug => self.filter.slug_query.clear(),
                         FilterItem::Tag(tag) => {
@@ -96,18 +94,17 @@ impl App {
 
                     self.recompute_view();
 
-                    let new_len = self.build_filter_items().len();
-                    self.selected_filter.clamp(new_len);
+                    self.selected_filter_item.clamp(self.filter_items.len());
                 }
             }
 
             Message::NoteSelectionUp => {
-                self.selected_note_entry
+                self.selected_note_item
                     .move_up(&self.flattened_rows, |r| r.is_selectable());
             }
 
             Message::NoteSelectionDown => {
-                self.selected_note_entry
+                self.selected_note_item
                     .move_down(&self.flattened_rows, |r| r.is_selectable());
             }
             Message::Quit => self.should_quit = true,
