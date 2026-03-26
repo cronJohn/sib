@@ -29,7 +29,7 @@ pub fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
 
     // Highlight the currently selected note
     let mut state = ListState::default();
-    state.select(Some(app.selected_note_entry));
+    app.selected_note_entry.apply_to_list_state(&mut state);
 
     let list = List::new(items)
         .block(Block::default().borders(Borders::ALL).title("Notes"))

@@ -1,42 +1,116 @@
-use crate::{app::App, context::Context, domain::tree::Row, message::Message};
+use crate::{
+    app::{
+        filter::FilterItem,
+        mode::{Focus, InputMode},
+        App,
+    },
+    context::Context,
+    message::Message,
+};
 
 impl App {
     pub fn update(&mut self, msg: Message, _ctx: &Context) {
         match msg {
-            Message::Quit => self.should_quit = true,
             Message::InputChar(c) => {
-                self.filter.slug_query.push(c);
-                let indices = self.apply_filters();
-                self.rebuild_tree(&indices);
+                self.input_buffer.push(c);
+
+                // live filtering ONLY for Path mode
+                if matches!(self.input_mode, InputMode::Path) {
+                    self.filter.slug_query = self.input_buffer.clone();
+                    self.recompute_view();
+                }
             }
 
             Message::DeleteChar => {
-                self.filter.slug_query.pop();
-                let indices = self.apply_filters();
-                self.rebuild_tree(&indices);
+                self.input_buffer.pop();
+
+                // live filtering ONLY for Path mode
+                if matches!(self.input_mode, InputMode::Path) {
+                    self.filter.slug_query = self.input_buffer.clone();
+                    self.recompute_view();
+                }
+            }
+
+            Message::SubmitInput => {
+                match self.input_mode {
+                    InputMode::Path => {
+                        // already handled live
+                    }
+
+                    InputMode::Tag => {
+                        if !self.input_buffer.is_empty() {
+                            self.filter.tags.push(self.input_buffer.clone());
+                            self.input_buffer.clear();
+                            self.recompute_view();
+                        }
+                    }
+
+                    InputMode::Meta => {
+                        if let Some((k, v)) = self.input_buffer.split_once(':') {
+                            self.filter
+                                .metadata
+                                .insert(k.trim().to_string(), v.trim().to_string());
+                            self.input_buffer.clear();
+                            self.recompute_view();
+                        }
+                    }
+                }
+            }
+
+            Message::SwitchMode(mode) => {
+                self.input_mode = mode;
+                self.input_buffer.clear();
+            }
+
+            Message::CycleFocusForward => {
+                self.focus = match self.focus {
+                    Focus::Input => Focus::Notes,
+                    Focus::Notes => Focus::Filters,
+                    Focus::Filters => Focus::Input,
+                };
+            }
+
+            Message::FilterUp => {
+                let items = self.build_filter_items();
+                self.selected_filter.move_up(&items, |_| true);
+            }
+
+            Message::FilterDown => {
+                let items = self.build_filter_items();
+                self.selected_filter.move_down(&items, |_| true);
+            }
+
+            Message::DeleteSelectedFilter => {
+                let items = self.build_filter_items();
+
+                if let Some(item) = items.get(self.selected_filter.get()) {
+                    match item {
+                        FilterItem::Slug => self.filter.slug_query.clear(),
+                        FilterItem::Tag(tag) => {
+                            self.filter.tags.retain(|t| t != tag);
+                        }
+                        FilterItem::Meta(k, _) => {
+                            self.filter.metadata.remove(k);
+                        }
+                    }
+
+                    self.recompute_view();
+
+                    let new_len = self.build_filter_items().len();
+                    self.selected_filter.clamp(new_len);
+                }
             }
 
             Message::NoteSelectionUp => {
-                let mut i = self.selected_note_entry.saturating_sub(1);
-                while i > 0 {
-                    if matches!(self.flattened_rows[i], Row::Note { .. }) {
-                        self.selected_note_entry = i;
-                        break;
-                    }
-                    i = i.saturating_sub(1);
-                }
+                self.selected_note_entry
+                    .move_up(&self.flattened_rows, |r| r.is_selectable());
             }
 
             Message::NoteSelectionDown => {
-                let mut i = self.selected_note_entry + 1;
-                while i < self.flattened_rows.len() {
-                    if matches!(self.flattened_rows[i], Row::Note { .. }) {
-                        self.selected_note_entry = i;
-                        break;
-                    }
-                    i += 1;
-                }
+                self.selected_note_entry
+                    .move_down(&self.flattened_rows, |r| r.is_selectable());
             }
+            Message::Quit => self.should_quit = true,
         }
     }
 }

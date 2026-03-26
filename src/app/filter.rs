@@ -9,6 +9,12 @@ pub struct FilterCriteria {
     pub metadata: HashMap<String, String>,
 }
 
+pub enum FilterItem {
+    Slug,
+    Tag(String),
+    Meta(String, String),
+}
+
 impl App {
     /// Apply current filters and return indices of notes that match
     pub fn apply_filters(&self) -> Vec<usize> {
@@ -40,5 +46,22 @@ impl App {
             })
             .map(|(idx, _)| idx)
             .collect()
+    }
+    pub fn build_filter_items(&self) -> Vec<FilterItem> {
+        let mut items = Vec::new();
+
+        if !self.filter.slug_query.is_empty() {
+            items.push(FilterItem::Slug);
+        }
+
+        for tag in &self.filter.tags {
+            items.push(FilterItem::Tag(tag.clone()));
+        }
+
+        for (k, v) in &self.filter.metadata {
+            items.push(FilterItem::Meta(k.clone(), v.clone()));
+        }
+
+        items
     }
 }

@@ -17,3 +17,9 @@ pub enum Row {
         index: usize,
     },
 }
+
+impl Row {
+    pub fn is_selectable(&self) -> bool {
+        matches!(self, Row::Note { .. })
+    }
+}

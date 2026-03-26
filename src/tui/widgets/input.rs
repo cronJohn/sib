@@ -4,11 +4,19 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::app::{mode::InputMode, App};
 
 /// Widget to let user input string to filter notes by slug
 pub fn render_input_widget(f: &mut Frame, area: Rect, app: &App) {
-    let paragraph = Paragraph::new(app.filter.slug_query.clone())
-        .block(Block::default().borders(Borders::ALL).title("Path Input"));
-    f.render_widget(paragraph, area);
+    let mode = match app.input_mode {
+        InputMode::Path => "PATH",
+        InputMode::Tag => "TAG",
+        InputMode::Meta => "META",
+    };
+
+    let text = format!("[{}] {}", mode, app.input_buffer);
+
+    let widget = Paragraph::new(text).block(Block::default().borders(Borders::ALL).title("Input"));
+
+    f.render_widget(widget, area);
 }
