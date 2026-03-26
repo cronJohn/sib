@@ -1,3 +1,4 @@
+use crate::app::mode::Focus;
 use crate::app::App;
 use crate::tui::widgets::*;
 use ratatui::layout::{Constraint, Direction, Layout};
@@ -30,8 +31,28 @@ pub fn draw(f: &mut Frame, app: &App) {
     let right_col = middle_chunks[1];
 
     // Render individual widgets
-    render_input_widget(f, top_row, app);
-    render_notes_widget(f, left_col, app);
-    render_filters_widget(f, right_col, app);
-    render_liveview_widget(f, bottom_row, app);
+    render_input_widget(
+        f,
+        top_row,
+        &app.input_panel,
+        matches!(app.panel_focus, Focus::Input),
+    );
+    render_tree_widget(
+        f,
+        left_col,
+        &app.tree_panel,
+        matches!(app.panel_focus, Focus::Tree),
+    );
+    render_filters_widget(
+        f,
+        right_col,
+        &app.filter_panel,
+        matches!(app.panel_focus, Focus::Filters),
+    );
+    render_liveview_widget(
+        f,
+        bottom_row,
+        &app.liveview_panel,
+        matches!(app.panel_focus, Focus::Liveview),
+    );
 }

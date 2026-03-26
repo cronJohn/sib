@@ -38,8 +38,9 @@ pub fn handle_key(key: KeyEvent, app: &mut App) -> Option<Message> {
     // Pane specific keybindings
     match app.panel_focus {
         Focus::Input => handle_input_keys(key),
-        Focus::Notes => handle_notes_keys(key),
+        Focus::Tree => handle_notes_keys(key),
         Focus::Filters => handle_filter_keys(key),
+        Focus::Liveview => handle_liveview_keys(key),
     }
 }
 
@@ -71,4 +72,8 @@ fn handle_filter_keys(key: KeyEvent) -> Option<Message> {
 
         _ => None,
     }
+}
+
+fn handle_liveview_keys(_key: KeyEvent) -> Option<Message> {
+    todo!();
 }

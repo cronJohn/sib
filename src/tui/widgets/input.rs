@@ -5,26 +5,23 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{
-    mode::{Focus, InputMode},
-    App,
-};
+use crate::app::{mode::InputMode, panels::input::InputPanel};
 
-/// Widget to let user input string to filter notes by slug
-pub fn render_input_widget(f: &mut Frame, area: Rect, app: &App) {
-    let mode = match app.input_mode {
-        InputMode::Path => "PATH",
-        InputMode::Tag => "TAG",
-        InputMode::Meta => "META",
+/// Widget to let user input string to filter notes
+pub fn render_input_widget(f: &mut Frame, area: Rect, panel: &InputPanel, is_focused: bool) {
+    let title = match panel.mode {
+        InputMode::Path => "Path",
+        InputMode::Tag => "Tag",
+        InputMode::Meta => "Meta",
     };
 
-    let border_style = if matches!(app.panel_focus, Focus::Input) {
+    let border_style = if is_focused {
         Style::default().fg(Color::Yellow)
     } else {
         Style::default()
     };
 
-    let text = format!("[{}] {}", mode, app.input_buffer);
+    let text = format!("[{}] {}", title, panel.buffer);
 
     let widget = Paragraph::new(text).block(
         Block::default()

@@ -4,11 +4,16 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::app::panels::liveview::LiveviewPanel;
 
 /// Widget to show live file contents of a Note
-pub fn render_liveview_widget(f: &mut Frame, area: Rect, _app: &App) {
-    let paragraph = Paragraph::new("Bottom row text")
-        .block(Block::default().borders(Borders::ALL).title("Bottom"));
+pub fn render_liveview_widget(
+    f: &mut Frame,
+    area: Rect,
+    _panel: &LiveviewPanel,
+    _is_focused: bool,
+) {
+    let paragraph = Paragraph::new("Liveview coming soon")
+        .block(Block::default().borders(Borders::ALL).title("Liveview"));
     f.render_widget(paragraph, area);
 }

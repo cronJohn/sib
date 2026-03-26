@@ -5,40 +5,37 @@ use ratatui::{
     Frame,
 };
 
-use crate::{
-    app::{mode::Focus, App},
-    domain::tree::Row,
-};
+use crate::{app::panels::tree::TreePanel, domain::tree::Row};
 
 /// Renders the notes sidebar as a tree-like list.
 /// Directories are visual only; only notes are selectable.
-pub fn render_notes_widget(f: &mut Frame, area: Rect, app: &App) {
-    let items: Vec<ListItem> = app
+pub fn render_tree_widget(f: &mut Frame, area: Rect, panel: &TreePanel, is_focused: bool) {
+    let border_style = if is_focused {
+        Style::default().fg(Color::Yellow)
+    } else {
+        Style::default()
+    };
+
+    let items: Vec<ListItem> = panel
         .flattened_rows
         .iter()
         .map(|row| match row {
             Row::Directory { name, depth } => {
-                // indent directories and prepend folder icon
                 let indent = "  ".repeat(*depth);
                 ListItem::new(format!("{}📁 {}", indent, name))
             }
             Row::Note { name, depth, .. } => {
-                // indent notes
                 let indent = "  ".repeat(*depth);
                 ListItem::new(format!("{}{}", indent, name))
             }
         })
         .collect();
 
-    // Highlight the currently selected note
     let mut state = ListState::default();
-    app.selected_note_item.apply_to_list_state(&mut state);
 
-    let border_style = if matches!(app.panel_focus, Focus::Notes) {
-        Style::default().fg(Color::Yellow)
-    } else {
-        Style::default()
-    };
+    if !panel.flattened_rows.is_empty() {
+        state.select(Some(panel.selection.get()));
+    }
 
     let list = List::new(items)
         .block(

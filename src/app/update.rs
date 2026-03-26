@@ -1,7 +1,7 @@
 use crate::{
     app::{
-        filter::FilterItem,
         mode::{Focus, InputMode},
+        panels::filter::FilterItem,
         App,
     },
     context::Context,
@@ -11,46 +11,53 @@ use crate::{
 impl App {
     pub fn update(&mut self, msg: Message, _ctx: &Context) {
         match msg {
+            // -----------------------------
+            // INPUT PANEL
+            // -----------------------------
             Message::InputChar(c) => {
-                self.input_buffer.push(c);
+                self.input_panel.add_char(c);
 
-                // live filtering ONLY for Path mode
-                if matches!(self.input_mode, InputMode::Path) {
-                    self.filter.slug_query = self.input_buffer.clone();
+                if matches!(self.input_panel.mode, InputMode::Path) {
+                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf();
                     self.recompute_view();
                 }
             }
 
             Message::DeleteChar => {
-                self.input_buffer.pop();
+                self.input_panel.remove_char();
 
-                // live filtering ONLY for Path mode
-                if matches!(self.input_mode, InputMode::Path) {
-                    self.filter.slug_query = self.input_buffer.clone();
+                if matches!(self.input_panel.mode, InputMode::Path) {
+                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf();
                     self.recompute_view();
                 }
             }
 
             Message::SubmitInput => {
-                match self.input_mode {
+                match self.input_panel.mode {
                     InputMode::Path => {
-                        // already handled live
+                        // already live-updated
                     }
 
                     InputMode::Tag => {
-                        if !self.input_buffer.is_empty() {
-                            self.filter.tags.push(self.input_buffer.clone());
-                            self.input_buffer.clear();
+                        if !self.input_panel.buffer.is_empty() {
+                            self.filter_panel
+                                .criteria
+                                .tags
+                                .push(self.input_panel.get_buf());
+
+                            self.input_panel.clear_buf();
                             self.recompute_view();
                         }
                     }
 
                     InputMode::Meta => {
-                        if let Some((k, v)) = self.input_buffer.split_once(':') {
-                            self.filter
+                        if let Some((k, v)) = self.input_panel.buffer.split_once(':') {
+                            self.filter_panel
+                                .criteria
                                 .metadata
                                 .insert(k.trim().to_string(), v.trim().to_string());
-                            self.input_buffer.clear();
+
+                            self.input_panel.clear_buf();
                             self.recompute_view();
                         }
                     }
@@ -58,55 +65,79 @@ impl App {
             }
 
             Message::SwitchMode(mode) => {
-                self.input_mode = mode;
-                self.input_buffer.clear();
+                self.input_panel.change_mode(mode);
+                self.input_panel.clear_buf();
             }
 
+            // -----------------------------
+            // FOCUS
+            // -----------------------------
             Message::CycleFocusForward => {
                 self.panel_focus = match self.panel_focus {
-                    Focus::Input => Focus::Notes,
-                    Focus::Notes => Focus::Filters,
+                    Focus::Input => Focus::Tree,
+                    Focus::Tree => Focus::Filters,
                     Focus::Filters => Focus::Input,
+                    _ => Focus::Input,
                 };
             }
 
+            // -----------------------------
+            // FILTER PANEL NAVIGATION
+            // -----------------------------
             Message::FilterUp => {
-                self.selected_filter_item
-                    .move_up(&self.filter_items, |_| true);
+                self.filter_panel
+                    .selection
+                    .up(self.filter_panel.items.len());
             }
 
             Message::FilterDown => {
-                self.selected_filter_item
-                    .move_down(&self.filter_items, |_| true);
+                self.filter_panel
+                    .selection
+                    .down(self.filter_panel.items.len());
             }
 
             Message::DeleteSelectedFilter => {
-                if let Some(item) = self.filter_items.get(self.selected_filter_item.get()) {
+                if let Some(item) = self
+                    .filter_panel
+                    .items
+                    .get(self.filter_panel.selection.get())
+                {
                     match item {
-                        FilterItem::Slug => self.filter.slug_query.clear(),
-                        FilterItem::Tag(tag) => {
-                            self.filter.tags.retain(|t| t != tag);
+                        FilterItem::Slug => {
+                            self.filter_panel.criteria.slug_query = "".to_owned();
                         }
+
+                        FilterItem::Tag(tag) => {
+                            self.filter_panel.criteria.tags.retain(|t| t != tag);
+                        }
+
                         FilterItem::Meta(k, _) => {
-                            self.filter.metadata.remove(k);
+                            self.filter_panel.criteria.metadata.remove(k);
                         }
                     }
 
                     self.recompute_view();
-
-                    self.selected_filter_item.clamp(self.filter_items.len());
                 }
             }
 
+            // -----------------------------
+            // TREE PANEL NAVIGATION
+            // -----------------------------
             Message::NoteSelectionUp => {
-                self.selected_note_item
-                    .move_up(&self.flattened_rows, |r| r.is_selectable());
+                self.tree_panel
+                    .selection
+                    .move_up(&self.tree_panel.flattened_rows, |r| r.is_selectable());
             }
 
             Message::NoteSelectionDown => {
-                self.selected_note_item
-                    .move_down(&self.flattened_rows, |r| r.is_selectable());
+                self.tree_panel
+                    .selection
+                    .move_down(&self.tree_panel.flattened_rows, |r| r.is_selectable());
             }
+
+            // -----------------------------
+            // EXIT
+            // -----------------------------
             Message::Quit => self.should_quit = true,
         }
     }
