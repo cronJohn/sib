@@ -8,7 +8,7 @@ use ratatui::{
 use crate::app::{filter::FilterItem, mode::Focus, App};
 
 /// Widget to render and filter by Note metadata
-pub fn render_metadata_widget(f: &mut Frame, area: Rect, app: &App) {
+pub fn render_filters_widget(f: &mut Frame, area: Rect, app: &App) {
     let items_data = app.build_filter_items();
 
     let items: Vec<ListItem> = items_data

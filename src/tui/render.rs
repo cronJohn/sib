@@ -32,6 +32,6 @@ pub fn draw(f: &mut Frame, app: &App) {
     // Render individual widgets
     render_input_widget(f, top_row, app);
     render_notes_widget(f, left_col, app);
-    render_metadata_widget(f, right_col, app);
+    render_filters_widget(f, right_col, app);
     render_liveview_widget(f, bottom_row, app);
 }
