@@ -37,43 +37,9 @@ pub fn handle_key(key: KeyEvent, app: &mut App) -> Option<Message> {
 
     // Pane specific keybindings
     match app.panel_focus {
-        Focus::Input => handle_input_keys(key),
-        Focus::Tree => handle_notes_keys(key),
-        Focus::Filters => handle_filter_keys(key),
-        Focus::Liveview => handle_liveview_keys(key),
+        Focus::Input => app.input_panel.handle_key(key),
+        Focus::Tree => app.tree_panel.handle_key(key),
+        Focus::Filters => app.filter_panel.handle_key(key),
+        Focus::Liveview => app.liveview_panel.handle_key(key),
     }
-}
-
-fn handle_input_keys(key: KeyEvent) -> Option<Message> {
-    use KeyCode::*;
-
-    match (key.code, key.modifiers) {
-        (Char(c), _) => Some(Message::InputChar(c)),
-        (Backspace, _) => Some(Message::DeleteChar),
-        (Enter, _) => Some(Message::SubmitInput),
-        _ => None,
-    }
-}
-
-fn handle_notes_keys(key: KeyEvent) -> Option<Message> {
-    match key.code {
-        KeyCode::Up => Some(Message::NoteSelectionUp),
-        KeyCode::Down => Some(Message::NoteSelectionDown),
-        _ => None,
-    }
-}
-
-fn handle_filter_keys(key: KeyEvent) -> Option<Message> {
-    match key.code {
-        KeyCode::Up => Some(Message::FilterUp),
-        KeyCode::Down => Some(Message::FilterDown),
-
-        KeyCode::Char('d') => Some(Message::DeleteSelectedFilter),
-
-        _ => None,
-    }
-}
-
-fn handle_liveview_keys(_key: KeyEvent) -> Option<Message> {
-    todo!();
 }

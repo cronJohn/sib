@@ -1,4 +1,6 @@
-use crate::app::mode::InputMode;
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
+
+use crate::{app::mode::InputMode, message::Message};
 
 /// Panel state for user input
 #[derive(Default)]
@@ -42,6 +44,17 @@ impl InputPanel {
             InputMode::Path => InputMode::Tag,
             InputMode::Tag => InputMode::Meta,
             InputMode::Meta => InputMode::Path,
+        }
+    }
+
+    pub fn handle_key(&self, key: KeyEvent) -> Option<Message> {
+        use KeyCode::*;
+
+        match (key.code, key.modifiers) {
+            (Char(c), _) => Some(Message::InputChar(c)),
+            (Backspace, _) => Some(Message::DeleteChar),
+            (Enter, _) => Some(Message::SubmitInput),
+            _ => None,
         }
     }
 }

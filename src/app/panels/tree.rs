@@ -1,7 +1,12 @@
-use crate::domain::{
-    note::Note,
-    selection::Selection,
-    tree::{Row, TreeNode},
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
+
+use crate::{
+    domain::{
+        note::Note,
+        selection::Selection,
+        tree::{Row, TreeNode},
+    },
+    message::Message,
 };
 
 /// Panel state for the notes tree
@@ -76,6 +81,13 @@ impl TreePanel {
                 depth,
                 index: note_idx,
             });
+        }
+    }
+    pub fn handle_key(&self, key: KeyEvent) -> Option<Message> {
+        match key.code {
+            KeyCode::Up => Some(Message::NoteSelectionUp),
+            KeyCode::Down => Some(Message::NoteSelectionDown),
+            _ => None,
         }
     }
 }

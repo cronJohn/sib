@@ -1,6 +1,11 @@
 use std::collections::HashMap;
 
-use crate::domain::{note::Note, selection::Selection};
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
+
+use crate::{
+    domain::{note::Note, selection::Selection},
+    message::Message,
+};
 
 #[derive(Default)]
 pub struct FilterCriteria {
@@ -86,5 +91,16 @@ impl FilterPanel {
         self.items = items;
 
         self.selection.clamp(self.items.len());
+    }
+
+    pub fn handle_key(&self, key: KeyEvent) -> Option<Message> {
+        match key.code {
+            KeyCode::Up => Some(Message::FilterUp),
+            KeyCode::Down => Some(Message::FilterDown),
+
+            KeyCode::Char('d') => Some(Message::DeleteSelectedFilter),
+
+            _ => None,
+        }
     }
 }
