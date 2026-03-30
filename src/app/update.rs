@@ -18,7 +18,7 @@ impl App {
                 self.input_panel.add_char(c);
 
                 if matches!(self.input_panel.mode, InputMode::Path) {
-                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf();
+                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf().to_owned();
                     self.recompute_view();
                 }
             }
@@ -27,7 +27,7 @@ impl App {
                 self.input_panel.remove_char();
 
                 if matches!(self.input_panel.mode, InputMode::Path) {
-                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf();
+                    self.filter_panel.criteria.slug_query = self.input_panel.get_buf().to_owned();
                     self.recompute_view();
                 }
             }
@@ -43,7 +43,7 @@ impl App {
                             self.filter_panel
                                 .criteria
                                 .tags
-                                .push(self.input_panel.get_buf());
+                                .push(self.input_panel.get_buf().to_owned());
 
                             self.input_panel.clear_buf();
                             self.recompute_view();

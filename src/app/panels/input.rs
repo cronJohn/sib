@@ -29,8 +29,8 @@ impl InputPanel {
         self.buffer.clear();
     }
 
-    pub fn get_buf(&self) -> String {
-        self.buffer.clone()
+    pub fn get_buf(&self) -> &str {
+        &self.buffer
     }
 
     pub fn change_mode(&mut self, mode: InputMode) {
