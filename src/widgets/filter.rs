@@ -5,37 +5,42 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::panels::filter::{FilterItem, FilterPanel};
+use crate::panels::filter::FilterItem;
+
+pub struct FilterWidgetOptions<'a> {
+    pub items: &'a [FilterItem],
+    pub selected_index: Option<usize>,
+    pub is_focused: bool,
+}
 
 /// Widget to render and filter by Note metadata
-pub fn render_filters_widget(f: &mut Frame, area: Rect, panel: &FilterPanel, is_focused: bool) {
-    let border_style = if is_focused {
+pub fn render_filter_widget(f: &mut Frame, area: Rect, options: FilterWidgetOptions) {
+    let border_style = if options.is_focused {
         Style::default().fg(Color::Yellow)
     } else {
         Style::default()
     };
 
-    let items: Vec<ListItem> = if panel.items.is_empty() {
+    let list_items: Vec<ListItem> = if options.items.is_empty() {
         vec![ListItem::new("No filters")]
     } else {
-        panel
+        options
             .items
             .iter()
             .map(|item| match item {
-                FilterItem::Slug => ListItem::new(format!("Path: {}", panel.criteria.slug_query)),
-                FilterItem::Tag(tag) => ListItem::new(format!("Tag: {}", tag)),
+                FilterItem::Slug(s) => ListItem::new(format!("Path: {}", s)),
+                FilterItem::Tag(t) => ListItem::new(format!("Tag: {}", t)),
                 FilterItem::Meta(k, v) => ListItem::new(format!("{}: {}", k, v)),
             })
             .collect()
     };
 
     let mut state = ListState::default();
-
-    if !panel.items.is_empty() && is_focused {
-        state.select(Some(panel.selection.get()));
+    if let Some(sel) = options.selected_index {
+        state.select(Some(sel));
     }
 
-    let list = List::new(items)
+    let list = List::new(list_items)
         .block(
             Block::default()
                 .borders(Borders::ALL)

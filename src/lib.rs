@@ -4,5 +4,7 @@ pub mod context;
 pub mod domain;
 pub mod logging;
 pub mod message;
+pub mod model;
+pub mod panels;
 pub mod services;
-pub mod tui;
+pub mod widgets;

@@ -1,10 +1,11 @@
-use crate::app::mode::Focus;
-use crate::app::App;
-use crate::tui::widgets::*;
-use ratatui::layout::{Constraint, Direction, Layout};
-use ratatui::Frame;
+use ratatui::{
+    layout::{Constraint, Direction, Layout},
+    Frame,
+};
 
-pub fn draw(f: &mut Frame, app: &App) {
+use crate::{model::Model, panels::Focus};
+
+pub fn render_app(f: &mut Frame, model: &Model) {
     let size = f.area();
 
     // Split vertically into 3 rows: top 10%, middle 80%, bottom 10%
@@ -31,28 +32,25 @@ pub fn draw(f: &mut Frame, app: &App) {
     let right_col = middle_chunks[1];
 
     // Render individual widgets
-    render_input_widget(
-        f,
-        top_row,
-        &app.input_panel,
-        matches!(app.panel_focus, Focus::Input),
-    );
-    render_tree_widget(
+    model
+        .input_panel
+        .render(f, top_row, matches!(model.panel_focus, Focus::Input));
+
+    model.tree_panel.render(
         f,
         left_col,
-        &app.tree_panel,
-        matches!(app.panel_focus, Focus::Tree),
+        &model.tree_items(),
+        matches!(model.panel_focus, Focus::Tree),
     );
-    render_filters_widget(
+
+    model.filter_panel.render(
         f,
         right_col,
-        &app.filter_panel,
-        matches!(app.panel_focus, Focus::Filters),
+        &model.build_filter_items(),
+        matches!(model.panel_focus, Focus::Filter),
     );
-    render_liveview_widget(
-        f,
-        bottom_row,
-        &app.liveview_panel,
-        matches!(app.panel_focus, Focus::Liveview),
-    );
+
+    model
+        .liveview_panel
+        .render(f, bottom_row, matches!(model.panel_focus, Focus::Liveview));
 }
