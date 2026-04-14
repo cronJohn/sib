@@ -1,8 +1,7 @@
 use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
 
-use crate::{message::Message, widgets::render_liveview_widget};
+use crate::{message::Message, model::Model, panels::Focus, widgets::render_liveview_widget};
 
-#[derive(Default)]
 pub struct LiveviewPanel;
 
 impl LiveviewPanel {
@@ -10,7 +9,7 @@ impl LiveviewPanel {
         Message::Noop
     }
 
-    pub fn render(&self, f: &mut Frame, area: Rect, is_focused: bool) {
-        render_liveview_widget(f, area, is_focused);
+    pub fn render(&self, f: &mut Frame, area: Rect, model: &Model) {
+        render_liveview_widget(f, area, matches!(model.panel_focus, Focus::Liveview));
     }
 }

@@ -1,10 +1,5 @@
 use color_eyre::Result;
-use sib::{
-    app::{run::run_tui, App},
-    config::load_config,
-    context::Context,
-    logging,
-};
+use sib::{app::App, config::load_config, context::Context, logging};
 use tracing::{error, info};
 
 fn main() -> Result<()> {
@@ -16,9 +11,9 @@ fn main() -> Result<()> {
 
     let context = Context::new(&config);
     let notes = context.parser.collect_notes();
-    let app = App::new(notes);
+    let mut app = App::new(notes);
 
-    if let Err(e) = run_tui(app, context) {
+    if let Err(e) = app.run(context) {
         error!("TUI encountered an error: {:?}", e);
     }
 

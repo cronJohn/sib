@@ -1,92 +1,53 @@
+use crate::app::App;
 use crate::context::Context;
+use crate::domain::tokenizer::parse_query;
 use crate::message::Message;
-use crate::model::Model;
-use crate::panels::filter::FilterItem;
 
-pub fn update(model: &mut Model, msg: Message, _ctx: &Context) {
-    use Message::*;
+impl App {
+    pub fn update(&mut self, msg: Message, ctx: &Context) {
+        use Message::*;
 
-    match msg {
-        // Global events
-        Quit => model.should_quit = true,
-        CycleFocusForward => {
-            model.panel_focus = model.panel_focus.next();
-        }
-
-        // Input panel events
-        SwitchInputMode(mode) => {
-            model.input_panel.mode = mode;
-        }
-
-        InputChar(c) => model.input_panel.buffer.push(c),
-        InputBackspace => {
-            model.input_panel.buffer.pop();
-        }
-
-        AddFilter => {
-            let item_to_filter = model
-                .input_panel
-                .get_filter_item()
-                .expect("Unable to get filter item");
-            match item_to_filter {
-                FilterItem::Slug(name) => model.filter_criteria.slug = Some(name),
-                FilterItem::Tag(tag) => model.filter_criteria.tags.push(tag),
-                FilterItem::Meta(k, v) => {
-                    model.filter_criteria.metadata.insert(k, v);
-                }
+        match msg {
+            // Global events
+            Quit => self.model.should_quit = true,
+            CycleFocusForward => {
+                self.model.panel_focus = self.model.panel_focus.next();
             }
 
-            model.recompute_filtered();
+            // Input panel events
+            InputChar(c) => {
+                self.input_panel.buffer.push(c);
+                self.recompute_results(ctx);
+            }
+            InputBackspace => {
+                self.input_panel.buffer.pop();
+                self.recompute_results(ctx);
+            }
 
-            model.input_panel.buffer.clear();
-        }
+            // Note panel events
+            NoteSelectionUp => {
+                self.notes_panel.selection_index += 1;
+            }
 
-        // Tree panel events
-        TreeSelectionUp => {
-            model.tree_move_up();
-        }
+            NoteSelectionDown => {
+                self.notes_panel.selection_index -= 1;
+            }
 
-        TreeSelectionDown => {
-            model.tree_move_down();
-        }
-
-        OpenSelected => {
-            if let Some(_note) = model.get_selected_note() {
+            OpenSelected => {
                 todo!();
             }
+
+            Noop => {}
         }
+    }
 
-        // Filter panel events
-        DeleteSelectedFilter => {
-            let items = model.build_filter_items();
-
-            if let Some(item) = items.get(model.filter_panel.selection_index.get()) {
-                match item {
-                    FilterItem::Slug(_) => model.filter_criteria.slug = None,
-                    FilterItem::Tag(tag) => {
-                        model.filter_criteria.tags.retain(|t| t != tag);
-                    }
-                    FilterItem::Meta(k, _) => {
-                        model.filter_criteria.metadata.remove(k);
-                    }
-                }
-
-                model.recompute_filtered();
-
-                // clamp selection
-                let len = model.build_filter_items().len();
-                model.filter_panel.selection_index.down(len);
-            }
-        }
-
-        FilterSelectionUp => {
-            model.filter_panel.selection_index.up();
-        }
-        FilterSelectionDown => {
-            let len = model.build_filter_items().len();
-            model.filter_panel.selection_index.down(len);
-        }
-
-        Noop => {}
+    fn recompute_results(&mut self, ctx: &Context) {
+        let tokens = parse_query(&self.input_panel.buffer);
+        self.model.filter_criteria.clear();
+        self.model.filter_criteria.extend_from_slice(&tokens);
+        self.model.filtered_results.clear();
+        self.model
+            .filtered_results
+            .extend_from_slice(&ctx.ranker.compute_results(&self.model.notes, &tokens));
     }
 }

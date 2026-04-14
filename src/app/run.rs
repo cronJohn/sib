@@ -8,37 +8,33 @@ use ratatui::{
     Terminal,
 };
 
-use crate::{
-    app::{update::update, view::render_app, App},
-    context::Context,
-};
+use crate::{app::App, context::Context};
 
-pub fn run_tui(mut app: App, ctx: Context) -> color_eyre::Result<()> {
-    use std::io::stdout;
+impl App {
+    pub fn run(&mut self, ctx: Context) -> color_eyre::Result<()> {
+        use std::io::stdout;
 
-    enable_raw_mode()?;
-    execute!(stdout(), EnterAlternateScreen)?;
+        enable_raw_mode()?;
+        execute!(stdout(), EnterAlternateScreen)?;
 
-    let backend = CrosstermBackend::new(stdout());
-    let mut terminal = Terminal::new(backend)?;
+        let backend = CrosstermBackend::new(stdout());
+        let mut terminal = Terminal::new(backend)?;
 
-    // Get init filtered notes
-    app.model.recompute_filtered();
+        loop {
+            terminal.draw(|f| self.render(f))?;
 
-    loop {
-        terminal.draw(|f| render_app(f, &app.model))?;
+            if let Event::Key(key) = event::read()? {
+                let msg = self.route_key(key);
+                self.update(msg, &ctx);
+            }
 
-        if let Event::Key(key) = event::read()? {
-            let msg = app.model.route_key(key);
-            update(&mut app.model, msg, &ctx);
+            if self.model.should_quit {
+                break;
+            }
         }
 
-        if app.model.should_quit {
-            break;
-        }
+        disable_raw_mode()?;
+        execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+        Ok(())
     }
-
-    disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    Ok(())
 }

@@ -1,7 +1,6 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
-use serde_yaml_ng::Value;
 
 use crate::services::parse::NoteMetadataState;
 
@@ -23,7 +22,7 @@ pub struct NoteMetadata {
     pub tags: Vec<String>,
     /// Extra metadata about the file
     #[serde(flatten)]
-    pub extra: HashMap<String, Value>,
+    pub extra: HashMap<String, String>,
 }
 
 impl NoteMetadata {
@@ -37,7 +36,7 @@ impl NoteMetadata {
 #[derive(Default)]
 pub struct NoteMetadataBuilder {
     tags: Vec<String>,
-    extra: HashMap<String, Value>,
+    extra: HashMap<String, String>,
 }
 
 impl NoteMetadataBuilder {
@@ -55,14 +54,15 @@ impl NoteMetadataBuilder {
         self
     }
 
-    pub fn field(mut self, key: impl Into<String>, value: Value) -> Self {
-        self.extra.insert(key.into(), value);
+    pub fn field<T: Into<String>>(mut self, key: T, value: T) -> Self {
+        self.extra.insert(key.into(), value.into());
         self
     }
 
-    // Convenience helpers (optional but practical)
-    pub fn string_field(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
-        self.extra.insert(key.into(), Value::String(value.into()));
+    pub fn fields(mut self, pairs: &[(&str, &str)]) -> Self {
+        for (k, v) in pairs.iter() {
+            self.extra.insert(k.to_string(), v.to_string());
+        }
         self
     }
 

@@ -1,4 +1,4 @@
-use sib::{
+use crate::{
     domain::note::{NoteMetadata, NoteMetadataBuilder},
     services::parse::ParseService,
 };
@@ -23,12 +23,12 @@ enum FixtureEntry {
     },
 }
 
-pub struct NotesFixture {
+pub struct NoteEnvFixture {
     tmp_dir: TempDir,
     files: Vec<FixtureEntry>,
 }
 
-impl Default for NotesFixture {
+impl Default for NoteEnvFixture {
     fn default() -> Self {
         Self {
             tmp_dir: TempDir::new().expect("Temp dir should be created"),
@@ -37,7 +37,7 @@ impl Default for NotesFixture {
     }
 }
 
-impl NotesFixture {
+impl NoteEnvFixture {
     pub fn file(mut self, path: &str, meta: Option<NoteMetadata>, content: &str) -> Self {
         self.files.push(FixtureEntry::Structured {
             path: PathBuf::from(path),
@@ -78,7 +78,7 @@ broken content"#,
 
             let metadata = NoteMetadataBuilder::default()
                 .tags(tags.into_iter().map(|s| s.to_string()).collect())
-                .string_field("difficulty", *difficulty)
+                .field("difficulty", *difficulty)
                 .build();
 
             let content = format!("# Note {}\nRandom content {}", i, rng.random::<u32>());

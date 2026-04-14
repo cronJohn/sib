@@ -1,11 +1,10 @@
-mod fixtures;
-mod helpers;
-
-use sib::{domain::note::NoteMetadataBuilder, services::parse::NoteMetadataState};
-
-use crate::{
-    fixtures::notes::{NotesFixture, TEST_DIFFICULTIES},
-    helpers::sort_notes,
+use sib::{
+    domain::note::NoteMetadataBuilder,
+    services::parse::NoteMetadataState,
+    test_utils::{
+        fixtures::note_env::{NoteEnvFixture, TEST_DIFFICULTIES},
+        helpers::sort_notes,
+    },
 };
 
 #[test]
@@ -13,7 +12,7 @@ fn collect_notes_bulk_randomized_success() {
     let bulk_amount = 100;
     let malformed_amount = 2;
 
-    let mut fx = NotesFixture::default().bulk_random(bulk_amount);
+    let mut fx = NoteEnvFixture::default().bulk_random(bulk_amount);
 
     for i in 0..malformed_amount {
         fx = fx.malformed(&format!("bad/broken{}.md", i));
@@ -44,11 +43,10 @@ fn collect_notes_bulk_randomized_success() {
 
                 // Difficulty must exist and be one of the allowed values
                 if let Some(value) = meta.extra.get("difficulty") {
-                    let diff_str = value.as_str().expect("Difficulty should be a string");
                     assert!(
-                        TEST_DIFFICULTIES.contains(&diff_str),
+                        TEST_DIFFICULTIES.contains(&value.as_str()),
                         "Difficulty {:?} not in allowed set",
-                        diff_str
+                        value
                     );
                 } else {
                     panic!("Difficulty metadata missing");
@@ -79,10 +77,10 @@ fn parse_single_note_exact_success() {
     let metadata = NoteMetadataBuilder::default()
         .tag("tag1")
         .tag("tag2")
-        .string_field("difficulty", "easy")
+        .field("difficulty", "easy")
         .build();
 
-    let (_tmp, service) = NotesFixture::default()
+    let (_tmp, service) = NoteEnvFixture::default()
         .file(expected_note_slug, Some(metadata.clone()), "Hello world")
         .build();
 
@@ -95,7 +93,7 @@ fn parse_single_note_exact_success() {
         NoteMetadataState::Valid(meta) => {
             assert_eq!(meta.tags, vec!["tag1", "tag2"]);
 
-            assert_eq!(meta.extra.get("difficulty").unwrap().as_str(), Some("easy"));
+            assert_eq!(meta.extra.get("difficulty").unwrap(), "easy");
         }
         _ => panic!("Expected valid metadata"),
     }
@@ -108,7 +106,7 @@ fn parse_single_note_exact_success() {
 fn parse_partial_note_success() {
     let metadata = NoteMetadataBuilder::default().tag("only-tags").build();
 
-    let (_tmp, service) = NotesFixture::default()
+    let (_tmp, service) = NoteEnvFixture::default()
         .file("note.md", Some(metadata), "Partial metadata")
         .build();
 
@@ -126,7 +124,7 @@ fn parse_partial_note_success() {
 
 #[test]
 fn rejects_unclosed_frontmatter() {
-    let (_tmp, service) = NotesFixture::default()
+    let (_tmp, service) = NoteEnvFixture::default()
         .raw(
             "broken.md",
             r#"---
@@ -148,7 +146,7 @@ Hello world"#,
 
 #[test]
 fn malformed_yaml_is_detected() {
-    let (_tmp, service) = NotesFixture::default().malformed("bad.md").build();
+    let (_tmp, service) = NoteEnvFixture::default().malformed("bad.md").build();
 
     let notes = service.collect_notes();
     let note = &notes[0];
@@ -159,7 +157,7 @@ fn malformed_yaml_is_detected() {
 /// Test race issues and fs bottlenecks
 #[test]
 fn large_scale_note_collection_success() {
-    let (_tmp, service) = NotesFixture::default().bulk_random(1000).build();
+    let (_tmp, service) = NoteEnvFixture::default().bulk_random(1000).build();
 
     let notes = service.collect_notes();
 

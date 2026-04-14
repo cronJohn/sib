@@ -4,7 +4,6 @@ use std::{
 };
 
 use rayon::prelude::*;
-use serde_yaml_ng::Value;
 use tracing::warn;
 use walkdir::WalkDir;
 
@@ -138,7 +137,7 @@ impl NoteMetadataState {
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<&Value> {
+    pub fn get(&self, key: &str) -> Option<&String> {
         match self {
             NoteMetadataState::Valid(data) => data.extra.get(key),
             _ => None,

@@ -6,8 +6,6 @@ use ratatui::{
 };
 
 pub struct InputWidgetOptions<T: Into<String>> {
-    /// String of the input mode to be displayed
-    pub mode: T,
     /// Input buffer to show
     pub buffer: T,
     /// Is this widget focused?
@@ -27,7 +25,7 @@ pub fn render_input_widget<T: Into<String>>(
         Style::default()
     };
 
-    let text = format!("[{}] {}", options.mode.into(), options.buffer.into());
+    let text = options.buffer.into();
 
     let paragraph = Paragraph::new(text).block(
         Block::default()

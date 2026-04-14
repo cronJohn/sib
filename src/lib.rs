@@ -7,4 +7,5 @@ pub mod message;
 pub mod model;
 pub mod panels;
 pub mod services;
+pub mod test_utils;
 pub mod widgets;

@@ -1,15 +1,14 @@
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
-    widgets::{Block, Borders, List, ListItem, ListState},
+    style::{Color, Style},
+    widgets::{Block, Borders, List, ListItem},
     Frame,
 };
 
-use crate::panels::filter::FilterItem;
+use crate::domain::tokenizer::Token;
 
 pub struct FilterWidgetOptions<'a> {
-    pub items: &'a [FilterItem],
-    pub selected_index: Option<usize>,
+    pub items: &'a [Token],
     pub is_focused: bool,
 }
 
@@ -28,31 +27,19 @@ pub fn render_filter_widget(f: &mut Frame, area: Rect, options: FilterWidgetOpti
             .items
             .iter()
             .map(|item| match item {
-                FilterItem::Slug(s) => ListItem::new(format!("Path: {}", s)),
-                FilterItem::Tag(t) => ListItem::new(format!("Tag: {}", t)),
-                FilterItem::Meta(k, v) => ListItem::new(format!("{}: {}", k, v)),
+                Token::Text(s) => ListItem::new(format!("Path: {}", s)),
+                Token::Tag(t) => ListItem::new(format!("Tag: {}", t)),
+                Token::Meta { key, value } => ListItem::new(format!("{}: {}", key, value)),
             })
             .collect()
     };
 
-    let mut state = ListState::default();
-    if let Some(sel) = options.selected_index {
-        state.select(Some(sel));
-    }
+    let list = List::new(list_items).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title("Filters")
+            .border_style(border_style),
+    );
 
-    let list = List::new(list_items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("Filters")
-                .border_style(border_style),
-        )
-        .highlight_style(
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )
-        .highlight_symbol(">> ");
-
-    f.render_stateful_widget(list, area, &mut state);
+    f.render_widget(list, area);
 }
