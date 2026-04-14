@@ -22,8 +22,19 @@ pub fn render_notes_widget(f: &mut Frame, area: Rect, options: &NoteWidgetOption
         Style::default()
     };
 
-    let start = options.scroll_offset;
-    let end = options.items.len();
+    let border_width = 2; // top and bottom borders
+    let max_visible = area.height.saturating_sub(border_width) as usize;
+    let mut scroll_offset = options.scroll_offset;
+
+    // Calculate scroll_offset to keep selected item at the bottom
+    if max_visible > 0 && options.items.len() > max_visible {
+        let target_offset = options.selected_index.saturating_sub(max_visible - 1);
+        let max_offset = options.items.len().saturating_sub(max_visible);
+        scroll_offset = target_offset.clamp(0, max_offset);
+    }
+
+    let start = scroll_offset;
+    let end = (scroll_offset + max_visible).min(options.items.len());
 
     // Reverse the slice to display from bottom to top
     let reversed_items: Vec<&String> = options.items[start..end].iter().rev().collect();
