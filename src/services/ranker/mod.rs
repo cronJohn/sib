@@ -93,8 +93,8 @@ impl RankerService {
             })
             .collect();
 
-        // Sort by score descending
-        results.sort_by_key(|r| -r.score);
+        // Sort by score ascending (lowest first, highest last)
+        results.sort_by_key(|r| r.score);
         results
     }
 

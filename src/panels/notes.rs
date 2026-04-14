@@ -10,7 +10,6 @@ use crate::{
 #[derive(Default)]
 pub struct NotesPanel {
     pub selection_index: usize,
-    pub scroll_offset: usize,
 }
 
 impl NotesPanel {
@@ -31,8 +30,6 @@ impl NotesPanel {
         let options = NoteWidgetOptions {
             selected_index: self.selection_index,
             is_focused: matches!(model.panel_focus, Focus::Notes),
-            scroll_offset: self.scroll_offset,
-            max_visible_items: area.height as usize,
             items,
         };
 

@@ -26,15 +26,15 @@ impl App {
 
             // Note panel events
             NoteSelectionUp => {
-                let max_index = self.model.filtered_results.len().saturating_sub(1);
-                if self.notes_panel.selection_index < max_index {
-                    self.notes_panel.selection_index += 1;
+                if self.notes_panel.selection_index > 0 {
+                    self.notes_panel.selection_index -= 1;
                 }
             }
 
             NoteSelectionDown => {
-                if self.notes_panel.selection_index > 0 {
-                    self.notes_panel.selection_index -= 1;
+                let max_index = self.model.filtered_results.len().saturating_sub(1);
+                if self.notes_panel.selection_index < max_index {
+                    self.notes_panel.selection_index += 1;
                 }
             }
 
@@ -54,5 +54,7 @@ impl App {
         self.model
             .filtered_results
             .extend_from_slice(&ctx.ranker.compute_results(&self.model.notes, &tokens));
+        // Reset selection to highest score item
+        self.notes_panel.selection_index = self.model.filtered_results.len().saturating_sub(1);
     }
 }
