@@ -26,11 +26,16 @@ impl App {
 
             // Note panel events
             NoteSelectionUp => {
-                self.notes_panel.selection_index += 1;
+                let max_index = self.model.filtered_results.len().saturating_sub(1);
+                if self.notes_panel.selection_index < max_index {
+                    self.notes_panel.selection_index += 1;
+                }
             }
 
             NoteSelectionDown => {
-                self.notes_panel.selection_index -= 1;
+                if self.notes_panel.selection_index > 0 {
+                    self.notes_panel.selection_index -= 1;
+                }
             }
 
             OpenSelected => {
