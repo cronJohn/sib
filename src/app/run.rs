@@ -11,7 +11,7 @@ use ratatui::{
 use crate::{app::App, context::Context};
 
 impl App {
-    pub fn run(&mut self, ctx: Context) -> color_eyre::Result<()> {
+    pub fn run(&mut self, mut ctx: Context) -> color_eyre::Result<()> {
         use std::io::stdout;
 
         enable_raw_mode()?;
@@ -25,7 +25,7 @@ impl App {
 
             if let Event::Key(key) = event::read()? {
                 let msg = self.route_key(key);
-                self.update(msg, &ctx);
+                self.update(msg, &mut ctx);
             }
 
             if self.model.should_quit {

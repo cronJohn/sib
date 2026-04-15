@@ -12,7 +12,7 @@ pub struct Context {
 impl Context {
     pub fn new(cfg: &Config) -> Self {
         Self {
-            editor: EditorService::new(cfg.editor.clone()),
+            editor: EditorService::new(cfg.editor.clone(), cfg.base_notes_dir.clone()),
             parser: ParseService::new(cfg.base_notes_dir.clone()),
             ranker: RankerService::new(cfg.usage_file.clone()),
         }

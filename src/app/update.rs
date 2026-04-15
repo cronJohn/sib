@@ -1,10 +1,12 @@
+use tracing::error;
+
 use crate::app::App;
 use crate::context::Context;
 use crate::domain::tokenizer::parse_query;
 use crate::message::Message;
 
 impl App {
-    pub fn update(&mut self, msg: Message, ctx: &Context) {
+    pub fn update(&mut self, msg: Message, ctx: &mut Context) {
         use Message::*;
 
         match msg {
@@ -39,7 +41,22 @@ impl App {
             }
 
             OpenSelected => {
-                todo!();
+                // Do nothing if no results
+                if self.model.filtered_results.is_empty() {
+                    return;
+                }
+
+                // Get the selected result item
+                let result_item = &self.model.filtered_results[self.notes_panel.selection_index];
+
+                // Get the actual note
+                let note = &self.model.notes[result_item.note_index];
+
+                // Open the file
+                match ctx.editor.open(note) {
+                    Ok(_) => ctx.ranker.record_open(note),
+                    Err(e) => error!("Unable to open note: {e}"),
+                }
             }
 
             Noop => {}
