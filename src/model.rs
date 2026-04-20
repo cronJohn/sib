@@ -4,9 +4,12 @@ use crate::panels::Focus;
 use crate::services::ranker::ResultItem;
 
 pub struct Model {
+    /// All notes inside base_notes_dir
     pub notes: Vec<Note>,
-    pub filtered_results: Vec<ResultItem>,
-    pub filter_criteria: Vec<Token>,
+    /// Collection of indices into notes based on rank score
+    pub ranked_notes: Vec<ResultItem>,
+    /// Collection of Tokens the user wants to filter/rank notes by
+    pub token_filters: Vec<Token>,
 
     pub panel_focus: Focus,
     pub should_quit: bool,
@@ -16,8 +19,8 @@ impl Model {
     pub fn new(notes: Vec<Note>) -> Self {
         Self {
             notes,
-            filtered_results: vec![],
-            filter_criteria: vec![],
+            ranked_notes: vec![],
+            token_filters: vec![],
             panel_focus: Focus::Input,
             should_quit: false,
         }

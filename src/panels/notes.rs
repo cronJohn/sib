@@ -19,7 +19,7 @@ impl NotesPanel {
 
     pub fn render(&self, f: &mut Frame, area: Rect, model: &Model) {
         let items: Vec<String> = model
-            .filtered_results
+            .ranked_notes
             .iter()
             .map(|r| {
                 let note = &model.notes[r.note_index];

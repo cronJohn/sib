@@ -19,7 +19,7 @@ impl FilterPanel {
             f,
             area,
             FilterWidgetOptions {
-                items: &model.filter_criteria,
+                items: &model.token_filters,
                 is_focused: matches!(model.panel_focus, Focus::Filter),
             },
         );

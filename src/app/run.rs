@@ -8,7 +8,7 @@ use ratatui::{
     Terminal,
 };
 
-use crate::{app::App, context::Context};
+use crate::{app::App, context::Context, message::Message};
 
 impl App {
     pub fn run(&mut self, mut ctx: Context) -> color_eyre::Result<()> {
@@ -19,6 +19,8 @@ impl App {
 
         let backend = CrosstermBackend::new(stdout());
         let mut terminal = Terminal::new(backend)?;
+
+        self.update(Message::Init, &mut ctx);
 
         loop {
             terminal.draw(|f| self.render(f))?;

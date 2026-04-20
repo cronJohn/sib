@@ -68,10 +68,6 @@ impl RankerService {
     fn save_usage(&self) {
         if let Ok(toml_str) = toml::to_string_pretty(&self.usage) {
             let _ = fs::write(&self.usage_file, &toml_str);
-            info!(
-                "Successfully wrote `{:?}` to usage file: {:?}",
-                &toml_str, &self.usage_file
-            );
         }
     }
 
@@ -112,6 +108,8 @@ impl RankerService {
         entry.last_opened = Some(now_ts());
 
         self.save_usage();
+
+        info!(note_slug = ?note.slug, "Saved note usage");
     }
 }
 

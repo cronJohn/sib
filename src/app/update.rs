@@ -11,6 +11,10 @@ impl App {
 
         match msg {
             // Global events
+            Init => {
+                self.recompute_search(ctx);
+                self.reset_selection();
+            }
             Quit => self.model.should_quit = true,
             CycleFocusForward => {
                 self.model.panel_focus = self.model.panel_focus.next();
@@ -19,11 +23,13 @@ impl App {
             // Input panel events
             InputChar(c) => {
                 self.input_panel.buffer.push(c);
-                self.recompute_results(ctx);
+                self.recompute_search(ctx);
+                self.reset_selection();
             }
             InputBackspace => {
                 self.input_panel.buffer.pop();
-                self.recompute_results(ctx);
+                self.recompute_search(ctx);
+                self.reset_selection();
             }
 
             // Note panel events
@@ -34,7 +40,7 @@ impl App {
             }
 
             NoteSelectionDown => {
-                let max_index = self.model.filtered_results.len().saturating_sub(1);
+                let max_index = self.model.ranked_notes.len().saturating_sub(1);
                 if self.notes_panel.selection_index < max_index {
                     self.notes_panel.selection_index += 1;
                 }
@@ -42,12 +48,12 @@ impl App {
 
             OpenSelected => {
                 // Do nothing if no results
-                if self.model.filtered_results.is_empty() {
+                if self.model.ranked_notes.is_empty() {
                     return;
                 }
 
                 // Get the selected result item
-                let result_item = &self.model.filtered_results[self.notes_panel.selection_index];
+                let result_item = &self.model.ranked_notes[self.notes_panel.selection_index];
 
                 // Get the actual note
                 let note = &self.model.notes[result_item.note_index];
@@ -63,15 +69,19 @@ impl App {
         }
     }
 
-    fn recompute_results(&mut self, ctx: &Context) {
+    fn recompute_search(&mut self, ctx: &Context) {
         let tokens = parse_query(&self.input_panel.buffer);
-        self.model.filter_criteria.clear();
-        self.model.filter_criteria.extend_from_slice(&tokens);
-        self.model.filtered_results.clear();
-        self.model
-            .filtered_results
-            .extend_from_slice(&ctx.ranker.compute_results(&self.model.notes, &tokens));
-        // Reset selection to highest score item
-        self.notes_panel.selection_index = self.model.filtered_results.len().saturating_sub(1);
+
+        self.model.token_filters.clear();
+        self.model.token_filters.extend_from_slice(&tokens);
+
+        let ranked = ctx.ranker.compute_results(&self.model.notes, &tokens);
+
+        self.model.ranked_notes.clear();
+        self.model.ranked_notes.extend_from_slice(&ranked);
+    }
+
+    fn reset_selection(&mut self) {
+        self.notes_panel.selection_index = self.model.ranked_notes.len().saturating_sub(1);
     }
 }

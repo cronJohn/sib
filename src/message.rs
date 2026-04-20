@@ -1,5 +1,6 @@
 #[derive(Debug)]
 pub enum Message {
+    Init,
     Quit,
     CycleFocusForward,
 
