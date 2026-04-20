@@ -3,60 +3,59 @@ pub mod loader;
 pub mod setup;
 
 pub use loader::load_config;
+use tracing::warn;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-use crate::config::defaults::{DEFAULT_BASE_NOTES_DIR, DEFAULT_EDITOR, DEFAULT_USAGE_FILE};
-
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct Config {
-    #[serde(default)]
     pub base_notes_dir: PathBuf,
-    #[serde(default)]
     pub usage_file: PathBuf,
-    #[serde(default)]
     pub editor: String,
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        let config_dir = Self::get_config_dir();
+#[derive(Deserialize)]
+pub struct RawConfig {
+    pub base_notes_dir: Option<PathBuf>,
+    pub usage_file: Option<PathBuf>,
+    pub editor: Option<String>,
+}
 
+impl Config {
+    pub fn from_raw(raw: RawConfig) -> Self {
         Self {
-            base_notes_dir: PathBuf::from(DEFAULT_BASE_NOTES_DIR),
-            usage_file: config_dir.join(DEFAULT_USAGE_FILE),
-            editor: String::from(DEFAULT_EDITOR),
+            base_notes_dir: raw
+                .base_notes_dir
+                .map(|p| normalize_path(&p))
+                .unwrap_or_else(|| {
+                    warn!("base notes directory missing, using default");
+                    Self::default_base_notes_dir()
+                }),
+
+            usage_file: raw
+                .usage_file
+                .map(|p| normalize_path(&p))
+                .unwrap_or_else(|| {
+                    warn!("usage file missing, using default");
+                    Self::default_usage_file()
+                }),
+
+            editor: raw.editor.unwrap_or_else(|| {
+                warn!("editor missing, using default");
+                Self::default_editor()
+            }),
         }
     }
 }
 
-impl Config {
-    /// Returns the application's config directory path
-    pub fn get_config_dir() -> PathBuf {
-        dirs::config_dir()
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("sib")
+pub fn normalize_path(input: &Path) -> PathBuf {
+    // Expand ~
+    match input.strip_prefix("~") {
+        Ok(stripped) => dirs::home_dir()
+            .map(|h| h.join(stripped))
+            .unwrap_or_else(|| input.to_path_buf()),
+        Err(_) => input.to_path_buf(),
     }
-
-    /// Returns the config file path
-    pub fn get_config_file_path() -> PathBuf {
-        Self::get_config_dir().join("config.toml")
-    }
-
-    /// Returns all required paths that need to be initialized
-    pub fn required_paths(&self) -> Vec<RequiredPath> {
-        vec![
-            RequiredPath::Dir("config dir", Self::get_config_dir()),
-            RequiredPath::File("config file", Self::get_config_file_path()),
-            RequiredPath::Dir("notes dir", self.base_notes_dir.clone()),
-            RequiredPath::File("usage file", self.usage_file.clone()),
-        ]
-    }
-}
-
-pub enum RequiredPath {
-    Dir(&'static str, PathBuf),
-    File(&'static str, PathBuf),
 }

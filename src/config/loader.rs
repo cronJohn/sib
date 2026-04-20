@@ -1,33 +1,33 @@
 use std::fs;
 
 use color_eyre::eyre::{Result, WrapErr};
-use tracing::{info, warn};
+use tracing::info;
 
-use crate::config::{setup::initialize_paths, Config};
+use crate::config::{defaults::CONFIG_FILE, setup::initialize_paths, Config, RawConfig};
 
 /// Loads the config, creates the config file if missing, and ensures all directories exist.
 pub fn load_config() -> Result<Config> {
-    let config_file_path = Config::get_config_file_path();
     let default_config = Config::default();
 
     initialize_paths(&default_config).wrap_err("Failed to initialize required paths")?;
 
-    let config = fs::read_to_string(&config_file_path)
-        .ok()
-        .and_then(|contents| toml::from_str(&contents).ok())
-        .unwrap_or_else(|| {
-            warn!("Config file missing or invalid. Using defaults.");
-            let _ = write_config_file(&config_file_path, &default_config);
-            default_config
-        });
+    let contents = match fs::read_to_string(&*CONFIG_FILE) {
+        Ok(c) => c,
+        Err(err) => return Err(err.into()),
+    };
 
-    info!("Config loaded and all paths initialized");
+    let raw: RawConfig = toml::from_str(&contents).unwrap_or(RawConfig {
+        base_notes_dir: None,
+        usage_file: None,
+        editor: None,
+    });
+
+    let config = Config::from_raw(raw);
+    info!(
+        base_notes_dir = ?config.base_notes_dir,
+        usage_file = ?config.usage_file,
+        editor = ?config.editor,
+        "Successfully loaded config"
+    );
     Ok(config)
-}
-
-fn write_config_file(path: &std::path::Path, config: &Config) -> Result<()> {
-    let toml_content = toml::to_string_pretty(config).wrap_err("Failed to serialize config")?;
-    fs::write(path, toml_content)
-        .wrap_err_with(|| format!("Failed to write config to {:?}", path))?;
-    Ok(())
 }

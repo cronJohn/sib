@@ -9,6 +9,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 use crate::domain::{note::Note, tokenizer::Token};
 
@@ -65,12 +66,12 @@ impl RankerService {
 
     /// Saves the service's UsageStats to its usage file
     fn save_usage(&self) {
-        if let Some(parent) = self.usage_file.parent() {
-            let _ = fs::create_dir_all(parent);
-        }
-
         if let Ok(toml_str) = toml::to_string_pretty(&self.usage) {
-            let _ = fs::write(&self.usage_file, toml_str);
+            let _ = fs::write(&self.usage_file, &toml_str);
+            info!(
+                "Successfully wrote `{:?}` to usage file: {:?}",
+                &toml_str, &self.usage_file
+            );
         }
     }
 
