@@ -2,6 +2,7 @@ pub mod app;
 pub mod config;
 pub mod context;
 pub mod domain;
+pub mod effect;
 pub mod logging;
 pub mod message;
 pub mod model;

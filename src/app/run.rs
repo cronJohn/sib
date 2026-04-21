@@ -1,3 +1,6 @@
+use std::io::stdout;
+
+use crate::{app::App, context::Context, message::Message};
 use ratatui::{
     crossterm::{
         event::{self, Event},
@@ -8,14 +11,11 @@ use ratatui::{
     Terminal,
 };
 
-use crate::{app::App, context::Context, message::Message};
-
 impl App {
     pub fn run(&mut self, mut ctx: Context) -> color_eyre::Result<()> {
         use std::io::stdout;
 
-        enable_raw_mode()?;
-        execute!(stdout(), EnterAlternateScreen)?;
+        resume_tui();
 
         let backend = CrosstermBackend::new(stdout());
         let mut terminal = Terminal::new(backend)?;
@@ -30,13 +30,24 @@ impl App {
                 self.update(msg, &mut ctx);
             }
 
+            self.run_effects(&mut ctx, &mut terminal)?;
+
             if self.model.should_quit {
                 break;
             }
         }
 
-        disable_raw_mode()?;
-        execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+        suspend_tui();
         Ok(())
     }
+}
+
+pub fn resume_tui() {
+    let _ = execute!(stdout(), EnterAlternateScreen);
+    let _ = enable_raw_mode();
+}
+
+pub fn suspend_tui() {
+    let _ = disable_raw_mode();
+    let _ = execute!(stdout(), LeaveAlternateScreen);
 }

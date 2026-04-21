@@ -1,5 +1,6 @@
 use crate::domain::note::Note;
 use crate::domain::tokenizer::Token;
+use crate::effect::Effect;
 use crate::panels::Focus;
 use crate::services::ranker::ResultItem;
 
@@ -10,6 +11,8 @@ pub struct Model {
     pub ranked_notes: Vec<ResultItem>,
     /// Collection of Tokens the user wants to filter/rank notes by
     pub token_filters: Vec<Token>,
+    /// Collection of Events that need to run
+    pub pending_effects: Vec<Effect>,
 
     pub panel_focus: Focus,
     pub should_quit: bool,
@@ -21,6 +24,7 @@ impl Model {
             notes,
             ranked_notes: vec![],
             token_filters: vec![],
+            pending_effects: vec![],
             panel_focus: Focus::Input,
             should_quit: false,
         }

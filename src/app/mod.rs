@@ -1,3 +1,4 @@
+pub mod effects;
 mod keys;
 pub mod run;
 mod update;

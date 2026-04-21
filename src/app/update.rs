@@ -1,8 +1,7 @@
-use tracing::error;
-
 use crate::app::App;
 use crate::context::Context;
 use crate::domain::tokenizer::parse_query;
+use crate::effect::Effect;
 use crate::message::Message;
 
 impl App {
@@ -52,17 +51,10 @@ impl App {
                     return;
                 }
 
-                // Get the selected result item
                 let result_item = &self.model.ranked_notes[self.notes_panel.selection_index];
+                let note = self.model.notes[result_item.note_index].clone();
 
-                // Get the actual note
-                let note = &self.model.notes[result_item.note_index];
-
-                // Open the file
-                match ctx.editor.open(note) {
-                    Ok(_) => ctx.ranker.record_open(note),
-                    Err(e) => error!("Unable to open note: {e}"),
-                }
+                self.model.pending_effects.push(Effect::OpenEditor(note));
             }
 
             Noop => {}
