@@ -5,7 +5,10 @@ use ratatui::{
     crossterm::{
         event::{self, Event},
         execute,
-        terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+        terminal::{
+            disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
+            LeaveAlternateScreen,
+        },
     },
     prelude::CrosstermBackend,
     Terminal,
@@ -49,5 +52,5 @@ pub fn resume_tui() {
 
 pub fn suspend_tui() {
     let _ = disable_raw_mode();
-    let _ = execute!(stdout(), LeaveAlternateScreen);
+    let _ = execute!(stdout(), LeaveAlternateScreen, Clear(ClearType::All));
 }
