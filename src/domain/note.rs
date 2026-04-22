@@ -1,6 +1,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
+use serde_yaml_ng::Value;
 
 use crate::services::parse::NoteMetadataState;
 
@@ -19,10 +20,11 @@ pub struct Note {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct NoteMetadata {
     /// Required field that will be universally used
+    #[serde(default)]
     pub tags: Vec<String>,
     /// Extra metadata about the file
     #[serde(flatten)]
-    pub extra: HashMap<String, String>,
+    pub extra: HashMap<String, Value>,
 }
 
 impl NoteMetadata {
@@ -31,12 +33,23 @@ impl NoteMetadata {
         let yaml = serde_yaml_ng::to_string(self).expect("Failed to serialize metadata");
         format!("---\n{}---\n", yaml)
     }
+
+    /// Get a value as a string (converts if needed)
+    pub fn get_as_string(&self, key: &str) -> Option<String> {
+        self.extra.get(key).map(|v| match v {
+            serde_yaml_ng::Value::String(s) => s.clone(),
+            serde_yaml_ng::Value::Number(n) => n.to_string(),
+            serde_yaml_ng::Value::Bool(b) => b.to_string(),
+            serde_yaml_ng::Value::Null => "null".to_string(),
+            _ => serde_yaml_ng::to_string(v).unwrap_or_default(),
+        })
+    }
 }
 
 #[derive(Default)]
 pub struct NoteMetadataBuilder {
     tags: Vec<String>,
-    extra: HashMap<String, String>,
+    extra: HashMap<String, Value>,
 }
 
 impl NoteMetadataBuilder {
@@ -55,13 +68,14 @@ impl NoteMetadataBuilder {
     }
 
     pub fn field<T: Into<String>>(mut self, key: T, value: T) -> Self {
-        self.extra.insert(key.into(), value.into());
+        self.extra.insert(key.into(), Value::String(value.into()));
         self
     }
 
     pub fn fields(mut self, pairs: &[(&str, &str)]) -> Self {
         for (k, v) in pairs.iter() {
-            self.extra.insert(k.to_string(), v.to_string());
+            self.extra
+                .insert(k.to_string(), Value::String(v.to_string()));
         }
         self
     }

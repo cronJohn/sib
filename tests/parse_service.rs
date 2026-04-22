@@ -1,3 +1,4 @@
+use serde_yaml_ng::{Number, Value};
 use sib::{
     domain::note::NoteMetadataBuilder,
     services::parse::NoteMetadataState,
@@ -42,7 +43,7 @@ fn collect_notes_bulk_randomized_success() {
                 );
 
                 // Difficulty must exist and be one of the allowed values
-                if let Some(value) = meta.extra.get("difficulty") {
+                if let Some(value) = meta.get_as_string("difficulty") {
                     assert!(
                         TEST_DIFFICULTIES.contains(&value.as_str()),
                         "Difficulty {:?} not in allowed set",
@@ -162,4 +163,47 @@ fn large_scale_note_collection_success() {
     let notes = service.collect_notes();
 
     assert_eq!(notes.len(), 1000);
+}
+
+#[test]
+fn literal_values_parse_succeeds() {
+    let (_tmp, service) = NoteEnvFixture::default()
+        .raw(
+            "raw_number.md",
+            r#"---
+string_value: hello
+number_int: 42
+number_float: 6.9
+boolean_true: true
+null_value: null
+array: [1, 2]
+---
+Has a number literal"#,
+        )
+        .build();
+
+    let notes = service.collect_notes();
+    let note = &notes[0];
+
+    match &note.metadata {
+        NoteMetadataState::Valid(meta) => {
+            assert!(meta.tags.is_empty());
+            assert_eq!(meta.get_as_string("string_value").unwrap(), "hello");
+            assert_eq!(meta.extra.get("number_int").unwrap().as_i64().unwrap(), 42);
+            assert_eq!(
+                meta.extra.get("number_float").unwrap().as_f64().unwrap(),
+                6.9
+            );
+            assert!(meta.extra.get("boolean_true").unwrap().as_bool().unwrap(),);
+            assert_eq!(meta.extra.get("null_value").unwrap().as_null().unwrap(), ());
+            assert_eq!(
+                meta.extra.get("array").unwrap().as_sequence().unwrap(),
+                &vec![
+                    Value::Number(Number::from(1)),
+                    Value::Number(Number::from(2))
+                ]
+            );
+        }
+        _ => panic!("Expected valid metadata: {:?}", note.metadata),
+    }
 }

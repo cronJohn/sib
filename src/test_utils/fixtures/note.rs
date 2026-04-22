@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use serde_yaml_ng::Value;
+
 use crate::{
     domain::note::{Note, NoteMetadata},
     services::parse::NoteMetadataState,
@@ -9,7 +11,7 @@ use crate::{
 pub struct NoteFixture {
     slug: String,
     tags: Vec<String>,
-    metadata: Vec<(String, String)>,
+    metadata: Vec<(String, Value)>,
 }
 
 impl NoteFixture {
@@ -24,7 +26,8 @@ impl NoteFixture {
     }
 
     pub fn field(mut self, key: &str, value: &str) -> Self {
-        self.metadata.push((key.to_owned(), value.to_owned()));
+        self.metadata
+            .push((key.to_owned(), Value::String(value.to_owned())));
         self
     }
 

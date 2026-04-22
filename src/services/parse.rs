@@ -130,16 +130,9 @@ pub enum NoteMetadataState {
 }
 
 impl NoteMetadataState {
-    pub fn tags(&self) -> Vec<String> {
+    pub fn get_metadata(&self) -> Option<&NoteMetadata> {
         match self {
-            NoteMetadataState::Valid(data) => data.tags.clone(),
-            _ => vec![],
-        }
-    }
-
-    pub fn get(&self, key: &str) -> Option<&String> {
-        match self {
-            NoteMetadataState::Valid(data) => data.extra.get(key),
+            NoteMetadataState::Valid(data) => Some(data),
             _ => None,
         }
     }

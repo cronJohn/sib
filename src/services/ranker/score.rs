@@ -23,7 +23,14 @@ impl RankerService {
         for token in tokens {
             match token {
                 Token::Tag(tag) => {
-                    if !note.metadata.tags().iter().any(|t| t.contains(tag)) {
+                    if !note
+                        .metadata
+                        .get_metadata()
+                        .unwrap()
+                        .tags
+                        .iter()
+                        .any(|t| t.contains(tag))
+                    {
                         return 0; // hard filter
                     }
                     score += TAG_BOOST;
@@ -32,7 +39,7 @@ impl RankerService {
                 Token::Meta { key, value } => {
                     match &note.metadata {
                         NoteMetadataState::Valid(md) => {
-                            if !md.extra.get(key).is_some_and(|v| v.contains(value)) {
+                            if !md.get_as_string(key).is_some_and(|v| v.contains(value)) {
                                 return 0; // hard filter
                             }
                             score += META_BOOST;
