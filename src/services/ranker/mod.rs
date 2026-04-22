@@ -29,6 +29,9 @@ pub struct ResultItem {
 pub struct RankerService {
     usage: HashMap<String, UsageStats>,
     usage_file: PathBuf,
+    /// Are there changes made to the in-memory usage HashMap
+    /// that need to be pushed to the usage_file?
+    is_usage_dirty: bool,
 }
 
 impl Default for RankerService {
@@ -36,6 +39,15 @@ impl Default for RankerService {
         Self {
             usage: HashMap::new(),
             usage_file: PathBuf::new(),
+            is_usage_dirty: false,
+        }
+    }
+}
+
+impl Drop for RankerService {
+    fn drop(&mut self) {
+        if self.is_usage_dirty {
+            self.save_usage();
         }
     }
 }
@@ -47,6 +59,7 @@ impl RankerService {
         Self {
             usage,
             usage_file: usage_path,
+            is_usage_dirty: false,
         }
     }
 
@@ -68,6 +81,7 @@ impl RankerService {
     fn save_usage(&self) {
         if let Ok(toml_str) = toml::to_string_pretty(&self.usage) {
             let _ = fs::write(&self.usage_file, &toml_str);
+            info!("Saved note usage to file");
         }
     }
 
@@ -107,9 +121,7 @@ impl RankerService {
         entry.open_count += 1;
         entry.last_opened = Some(now_ts());
 
-        self.save_usage();
-
-        info!(note_slug = ?note.slug, "Saved note usage");
+        self.is_usage_dirty = true;
     }
 }
 
