@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use crate::config::Config;
+use crate::{config::Config, ui::glyphs::GlyphMode};
 
 pub const DEFAULT_BASE_NOTES_DIR: &str = "notes";
 pub const DEFAULT_USAGE_FILE: &str = "usage.toml";
@@ -20,6 +20,7 @@ impl Default for Config {
             base_notes_dir: Self::default_base_notes_dir(),
             usage_file: Self::default_usage_file(),
             editor: Self::default_editor(),
+            glyph_mode: Self::default_glyph_mode(),
         }
     }
 }
@@ -38,5 +39,9 @@ impl Config {
 
     pub fn default_editor() -> String {
         DEFAULT_EDITOR.to_string()
+    }
+
+    pub fn default_glyph_mode() -> GlyphMode {
+        GlyphMode::default()
     }
 }

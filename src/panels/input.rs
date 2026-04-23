@@ -1,15 +1,12 @@
 use ratatui::{
     crossterm::event::{KeyCode, KeyEvent},
     layout::Rect,
+    style::{Color, Style},
+    widgets::{Block, Borders, Paragraph},
     Frame,
 };
 
-use crate::{
-    message::Message,
-    model::Model,
-    panels::Focus,
-    widgets::{input::InputWidgetOptions, render_input_widget},
-};
+use crate::{app::render_context::RenderContext, message::Message, panels::Focus};
 
 #[derive(Default)]
 pub struct InputPanel {
@@ -28,14 +25,20 @@ impl InputPanel {
         }
     }
 
-    pub fn render(&self, f: &mut Frame, area: Rect, model: &Model) {
-        render_input_widget(
-            f,
-            area,
-            InputWidgetOptions {
-                buffer: &self.buffer,
-                is_focused: matches!(model.panel_focus, Focus::Input),
-            },
+    pub fn render(&self, f: &mut Frame, area: Rect, ctx: &RenderContext) {
+        let border_style = if matches!(ctx.model.panel_focus, Focus::Input) {
+            Style::default().fg(Color::Yellow)
+        } else {
+            Style::default()
+        };
+
+        let paragraph = Paragraph::new(self.buffer.to_owned()).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Input")
+                .border_style(border_style),
         );
+
+        f.render_widget(paragraph, area);
     }
 }

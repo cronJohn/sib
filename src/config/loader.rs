@@ -20,6 +20,7 @@ pub fn load_config() -> Result<Config> {
         base_notes_dir: None,
         usage_file: None,
         editor: None,
+        glyph_mode: None,
     });
 
     let config = Config::from_raw(raw);
@@ -27,6 +28,7 @@ pub fn load_config() -> Result<Config> {
         base_notes_dir = ?config.base_notes_dir,
         usage_file = ?config.usage_file,
         editor = ?config.editor,
+        glyph_mode = ?config.glyph_mode,
         "Successfully loaded config"
     );
     Ok(config)

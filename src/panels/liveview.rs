@@ -1,6 +1,11 @@
-use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
+use ratatui::{
+    crossterm::event::KeyEvent,
+    layout::Rect,
+    widgets::{Block, Borders, Paragraph},
+    Frame,
+};
 
-use crate::{message::Message, model::Model, panels::Focus, widgets::render_liveview_widget};
+use crate::{app::render_context::RenderContext, message::Message};
 
 pub struct LiveviewPanel;
 
@@ -9,7 +14,9 @@ impl LiveviewPanel {
         Message::Noop
     }
 
-    pub fn render(&self, f: &mut Frame, area: Rect, model: &Model) {
-        render_liveview_widget(f, area, matches!(model.panel_focus, Focus::Liveview));
+    pub fn render(&self, f: &mut Frame, area: Rect, _ctx: &RenderContext) {
+        let paragraph = Paragraph::new("Liveview coming soon")
+            .block(Block::default().borders(Borders::ALL).title("Liveview"));
+        f.render_widget(paragraph, area);
     }
 }

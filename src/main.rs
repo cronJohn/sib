@@ -11,7 +11,7 @@ fn main() -> Result<()> {
 
     let context = Context::new(&config);
     let notes = context.parser.collect_notes();
-    let mut app = App::new(notes);
+    let mut app = App::new(notes, config);
 
     if let Err(e) = app.run(context) {
         error!("TUI encountered an error: {:?}", e);

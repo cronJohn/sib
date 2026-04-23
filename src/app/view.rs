@@ -3,7 +3,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::app::{render_context::RenderContext, App};
 
 impl App {
     pub fn render(&self, f: &mut Frame) {
@@ -32,10 +32,15 @@ impl App {
         let left_col = middle_chunks[0];
         let right_col = middle_chunks[1];
 
+        let ctx = RenderContext {
+            model: &self.model,
+            renderer: &self.renderer,
+        };
+
         // Render individual widgets
-        self.input_panel.render(f, top_row, &self.model);
-        self.notes_panel.render(f, left_col, &self.model);
-        self.filter_panel.render(f, right_col, &self.model);
-        self.liveview_panel.render(f, bottom_row, &self.model);
+        self.input_panel.render(f, top_row, &ctx);
+        self.notes_panel.render(f, left_col, &ctx);
+        self.filter_panel.render(f, right_col, &ctx);
+        self.liveview_panel.render(f, bottom_row, &ctx);
     }
 }
