@@ -3,7 +3,7 @@ use std::fs;
 use color_eyre::eyre::{Result, WrapErr};
 use tracing::info;
 
-use crate::config::{defaults::CONFIG_FILE, setup::initialize_paths, Config, RawConfig};
+use crate::config::{Config, RawConfig, defaults::CONFIG_FILE, setup::initialize_paths};
 
 /// Loads the config, creates the config file if missing, and ensures all directories exist.
 pub fn load_config() -> Result<Config> {

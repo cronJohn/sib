@@ -4,8 +4,8 @@ use std::path::Path;
 use tracing::info;
 
 use crate::config::{
-    defaults::{CONFIG_DIR, CONFIG_FILE},
     Config,
+    defaults::{CONFIG_DIR, CONFIG_FILE},
 };
 
 /// Ensure all directories in the config exist, creating them if needed.

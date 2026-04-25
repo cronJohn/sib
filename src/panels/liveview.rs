@@ -1,8 +1,8 @@
 use ratatui::{
+    Frame,
     crossterm::event::KeyEvent,
     layout::Rect,
     widgets::{Block, Borders, Paragraph},
-    Frame,
 };
 
 use crate::{app::render_context::RenderContext, message::Message};

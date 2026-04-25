@@ -6,7 +6,7 @@ use std::fs;
 use std::path::PathBuf;
 use tempfile::TempDir;
 
-use rand::{rngs::StdRng, seq::IndexedRandom, RngExt, SeedableRng};
+use rand::{RngExt, SeedableRng, rngs::StdRng, seq::IndexedRandom};
 
 pub const TEST_DIFFICULTIES: [&str; 3] = ["easy", "medium", "hard"];
 pub const TEST_TAG_POOL: [&str; 3] = ["web", "pwn", "forensics"];

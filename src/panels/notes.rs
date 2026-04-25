@@ -1,10 +1,10 @@
 use ratatui::{
+    Frame,
     crossterm::event::KeyEvent,
     layout::Rect,
     style::{Color, Modifier, Style},
     text::Span,
     widgets::{Block, Borders, List, ListItem},
-    Frame,
 };
 
 use crate::{app::render_context::RenderContext, message::Message, panels::Focus};

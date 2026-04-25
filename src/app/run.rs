@@ -2,16 +2,16 @@ use std::io::stdout;
 
 use crate::{app::App, context::Context, message::Message};
 use ratatui::{
+    Terminal,
     crossterm::{
         event::{self, Event},
         execute,
         terminal::{
-            disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
-            LeaveAlternateScreen,
+            Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode,
+            enable_raw_mode,
         },
     },
     prelude::CrosstermBackend,
-    Terminal,
 };
 
 impl App {

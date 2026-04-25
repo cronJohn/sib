@@ -1,12 +1,12 @@
 use std::io::Stdout;
 
-use ratatui::{prelude::CrosstermBackend, Terminal};
+use ratatui::{Terminal, prelude::CrosstermBackend};
 use tracing::info;
 
 use crate::{
     app::{
-        run::{resume_tui, suspend_tui},
         App,
+        run::{resume_tui, suspend_tui},
     },
     context::Context,
     effect::Effect,

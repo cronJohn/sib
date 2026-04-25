@@ -1,9 +1,9 @@
 use ratatui::{
+    Frame,
     crossterm::event::KeyEvent,
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, Borders, List, ListItem},
-    Frame,
 };
 
 use crate::{

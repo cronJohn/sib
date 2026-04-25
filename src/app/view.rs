@@ -1,9 +1,9 @@
 use ratatui::{
-    layout::{Constraint, Direction, Layout},
     Frame,
+    layout::{Constraint, Direction, Layout},
 };
 
-use crate::app::{render_context::RenderContext, App};
+use crate::app::{App, render_context::RenderContext};
 
 impl App {
     pub fn render(&self, f: &mut Frame) {

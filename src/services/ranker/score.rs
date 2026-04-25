@@ -5,11 +5,11 @@ use crate::{
     services::{
         parse::NoteMetadataState,
         ranker::{
+            RankerService, UsageStats,
             constants::{
                 FREQUENCY_DAMPENING, FREQUENCY_OFFSET, FREQUENCY_WEIGHT, META_BOOST,
                 RECENCY_TAU_DAYS, RECENCY_WEIGHT, SCALE, SLUG_BOOST, TAG_BOOST,
             },
-            RankerService, UsageStats,
         },
     },
 };

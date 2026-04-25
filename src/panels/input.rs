@@ -1,9 +1,9 @@
 use ratatui::{
+    Frame,
     crossterm::event::{KeyCode, KeyEvent},
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, Borders, Paragraph},
-    Frame,
 };
 
 use crate::{app::render_context::RenderContext, message::Message, panels::Focus};
