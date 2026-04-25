@@ -19,8 +19,8 @@ pub const UNICODE: Glyphs = Glyphs {
 };
 
 pub const NERD: Glyphs = Glyphs {
-    tag: "\u{f412}",
-    path: "\u{ea83}",
+    tag: "\u{f412} ",
+    path: "\u{ea83} ",
 };
 
 impl GlyphMode {
