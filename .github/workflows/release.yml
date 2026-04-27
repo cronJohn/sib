@@ -1,0 +1,121 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: sib
+            ext: ""
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            bin: sib
+            ext: ""
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            bin: sib
+            ext: ""
+
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: sib
+            ext: ".exe"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist
+          BIN_PATH="target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }}"
+          OUT_BASE="dist/${{ matrix.bin }}-${{ matrix.target }}"
+
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            powershell Compress-Archive "$BIN_PATH" "$OUT_BASE.zip"
+          else
+            tar -czf "$OUT_BASE.tar.gz" -C "$(dirname "$BIN_PATH")" "$(basename "$BIN_PATH")"
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------- VERSION CHECK --------
+      - name: Verify Cargo.toml version matches tag
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+
+          echo "Tag: $TAG"
+          echo "Cargo.toml: $VERSION"
+
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Version mismatch!"
+            exit 1
+          fi
+
+      # -------- DOWNLOAD ALL BUILD ARTIFACTS --------
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      # -------- COLLECT INTO SINGLE DIST FOLDER --------
+      - name: Collect artifacts
+        run: |
+          mkdir dist
+          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} dist/ \;
+
+      # -------- GENERATE CHECKSUMS --------
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+
+      # -------- CREATE DRAFT RELEASE --------
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: false
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: ""
+          files: dist/*
